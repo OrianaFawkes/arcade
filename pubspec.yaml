@@ -1,0 +1,32 @@
+name: arcade
+description: "Mom Said It's My Turn to Feed the Algorithm"
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.8
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  go_router: ^17.5.0
+  shared_preferences: ^2.5.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+
+  uses-material-design: true
+
+  fonts:
+    - family: DepartureMono
+      fonts:
+        - asset: assets/fonts/DepartureMono/DepartureMono-Regular.otf
