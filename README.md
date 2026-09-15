@@ -10,6 +10,17 @@ Currently featuring:
 
 ## Development
 
+`main` contains the deployable version of Arcade.
+
+For larger features, fixes, and experiments, use short-lived branches
+off `main` and merge completed work back into `main`.
+
+Branch naming conventions:
+
+- `feature/<name>` — new functionality
+- `fix/<name>` — bug fixes
+- `experiment/<name>` — exploratory work
+
 ### Requirements
 
 * Flutter SDK
