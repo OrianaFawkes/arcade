@@ -1,5 +1,5 @@
 import 'package:arcade/features/2048/game/game_storage.dart';
-import 'package:arcade/features/2048/presentation/color_picker_dialog.dart';
+import 'package:arcade/features/2048/presentation/settings_dialog.dart';
 import 'package:arcade/features/2048/presentation/tile_color_scheme.dart';
 import 'package:arcade/shared/presentation/dialogs/app_dialog.dart';
 import 'package:flutter/material.dart';
@@ -176,13 +176,13 @@ class _A2048ScreenState extends State<A2048Screen> {
     }
   }
 
-  Future<void> _showColorPicker() async {
+  Future<void> _showSettings() async {
     if (game == null) return;
 
     await showAppDialog(
       context: context,
-      barrierLabel: 'DiscardPile',
-      widget: ColorPickerDialog(game: game!),
+      barrierLabel: 'Settings',
+      widget: SettingsDialog(game: game!),
     );
 
     if (!mounted) return;
@@ -217,18 +217,18 @@ class _A2048ScreenState extends State<A2048Screen> {
                 child: Center(child: Text('Best: ${game!.highScore}')),
               ),
               IconButton(
-                onPressed: _showColorPicker,
-                icon: Icon(Icons.palette),
-                tooltip: 'Tile color',
+                onPressed: _showSettings,
+                icon: Icon(Icons.settings_rounded),
+                tooltip: 'Settings',
               ),
               IconButton(
                 onPressed: game!.canUndo ? _undo : null,
-                icon: Icon(Icons.undo),
+                icon: Icon(Icons.undo_rounded),
                 tooltip: 'Undo (Z)',
               ),
               IconButton(
                 onPressed: _restart,
-                icon: Icon(Icons.refresh),
+                icon: Icon(Icons.refresh_rounded),
                 tooltip: 'Restart (R)',
               ),
             ],
@@ -242,6 +242,7 @@ class _A2048ScreenState extends State<A2048Screen> {
               ),
               showWinOverlay: _showWinOverlay,
               isGameOver: game!.isGameOver,
+              hasBoardJiggle: game!.hasBoardJiggle,
               score: game!.score,
               onRestart: _restart,
               onContinue: _continueGame,

@@ -11,6 +11,7 @@ class GameStorage {
   static const _highScoreKey = '2048_high_score';
   static const _hasShownWinKey = '2048_has_shown_win';
   static const _tileColorKey = '2048_tile_color';
+  static const _hasBoardJiggleKey = '2048_has_board_jiggle';
 
   final SharedPreferences preferences;
 
@@ -78,5 +79,13 @@ class GameStorage {
       preferences.getInt(_tileColorKey) ??
           TileColorScheme.presets.first.baseColor.toARGB32(),
     );
+  }
+
+  Future<void> saveHasBoardJiggle(bool hasBoardJiggle) async {
+    await preferences.setBool(_hasBoardJiggleKey, hasBoardJiggle);
+  }
+
+  bool loadHasBoardJiggle() {
+    return preferences.getBool(_hasBoardJiggleKey) ?? true;
   }
 }

@@ -30,6 +30,8 @@ class GameController {
   bool _hasShownWin = false;
   bool _justWon = false;
 
+  bool? _hasBoardJiggle;
+
   int get score => _score;
   int get highScore => _highScore;
 
@@ -42,6 +44,7 @@ class GameController {
   bool get justWon => _justWon;
   bool get isGameOver => !canMove();
   bool get hasWon => _tiles.any((tile) => tile.value >= targetValue);
+  bool get hasBoardJiggle => _hasBoardJiggle ?? true;
 
   Future<void> initialize() async {
     try {
@@ -144,6 +147,12 @@ class GameController {
     _tileBaseColor = color;
 
     await storage.saveTileColor(color);
+  }
+
+  Future<void> setHasBoardJiggle(bool hasBoardJiggle) async {
+    _hasBoardJiggle = hasBoardJiggle;
+
+    await storage.saveHasBoardJiggle(hasBoardJiggle);
   }
 
   bool moveLeft() {

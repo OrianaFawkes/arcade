@@ -16,6 +16,7 @@ class Board extends StatefulWidget {
 
   final bool showWinOverlay;
   final bool isGameOver;
+  final bool hasBoardJiggle;
 
   final int score;
 
@@ -29,6 +30,7 @@ class Board extends StatefulWidget {
     required this.colorScheme,
     required this.showWinOverlay,
     required this.isGameOver,
+    required this.hasBoardJiggle,
     required this.score,
     required this.onRestart,
     required this.onContinue,
@@ -187,6 +189,10 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     return AnimatedBuilder(
       animation: _jiggleController,
       builder: (_, child) {
+        if (child == null) return SizedBox();
+
+        if (!widget.hasBoardJiggle) return child;
+
         final offset = _jiggleAnimation.value;
 
         return Transform.translate(

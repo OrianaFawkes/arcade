@@ -4,11 +4,16 @@ import 'package:arcade/shared/presentation/widgets/dialog_container.dart';
 import 'package:arcade/shared/presentation/widgets/pixel_card.dart';
 import 'package:flutter/material.dart';
 
-class ColorPickerDialog extends StatelessWidget {
+class SettingsDialog extends StatefulWidget {
   final GameController game;
 
-  const ColorPickerDialog({super.key, required this.game});
+  const SettingsDialog({super.key, required this.game});
 
+  @override
+  State<SettingsDialog> createState() => _SettingsDialogState();
+}
+
+class _SettingsDialogState extends State<SettingsDialog> {
   @override
   Widget build(BuildContext context) {
     return DialogContainer(
@@ -25,7 +30,7 @@ class ColorPickerDialog extends StatelessWidget {
               for (final preset in TileColorScheme.presets)
                 GestureDetector(
                   onTap: () async {
-                    await game.setTileBaseColor(preset.baseColor);
+                    await widget.game.setTileBaseColor(preset.baseColor);
 
                     if (!context.mounted) return;
 
@@ -37,7 +42,8 @@ class ColorPickerDialog extends StatelessWidget {
                       width: 32.0,
                       height: 32.0,
                       child: PixelCard(
-                        borderColor: game.tileBaseColor == preset.baseColor
+                        borderColor:
+                            widget.game.tileBaseColor == preset.baseColor
                             ? Color(0xFF2D1B1B)
                             : preset.baseColor,
                         fillColor: preset.baseColor,
@@ -48,6 +54,19 @@ class ColorPickerDialog extends StatelessWidget {
                   ),
                 ),
             ],
+          ),
+          Text('Board Jiggle', style: Theme.of(context).textTheme.titleLarge),
+          // TODO: Pixel-ify
+          Switch(
+            value: widget.game.hasBoardJiggle,
+            activeThumbColor: widget.game.tileBaseColor,
+            onChanged: (bool value) async {
+              await widget.game.setHasBoardJiggle(value);
+
+              if (!context.mounted) return;
+
+              setState(() {});
+            },
           ),
         ],
       ),
