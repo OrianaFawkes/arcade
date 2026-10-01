@@ -8,9 +8,19 @@ class ArcadeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: ElevatedButton(
-          onPressed: () => context.go('/2048'),
-          child: Text('2048'),
+        child: Column(
+          mainAxisSize: .min,
+          spacing: 16.0,
+          children: [
+            ElevatedButton(
+              onPressed: () => context.go('/2048'),
+              child: Text('2048'),
+            ),
+            ElevatedButton(
+              onPressed: () => context.go('/minesweeper'),
+              child: Text('Minesweeper'),
+            ),
+          ],
         ),
       ),
     );
