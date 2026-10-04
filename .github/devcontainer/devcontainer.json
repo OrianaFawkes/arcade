@@ -1,0 +1,21 @@
+{
+  "name": "Arcade Flutter Web",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Dart-Code.flutter"
+      ]
+    }
+  },
+  "postCreateCommand": "flutter --version && flutter doctor && flutter pub get",
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "Flutter Web",
+      "onAutoForward": "notify"
+    }
+  }
+}
