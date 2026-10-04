@@ -16,9 +16,14 @@ RUN apt-get update \
         liblzma-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/flutter/flutter.git --depth 1 --branch stable /opt/flutter
+RUN git clone https://github.com/flutter/flutter.git \
+        --depth 1 \
+        --branch stable \
+        /opt/flutter \
+    && git config --system --add safe.directory /opt/flutter
 
 ENV PATH="/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:${PATH}"
 
 RUN flutter config --enable-web \
-    && flutter precache --web
+    && flutter precache --web \
+    && chown -R vscode:vscode /opt/flutter
