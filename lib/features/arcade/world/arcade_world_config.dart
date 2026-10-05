@@ -1,14 +1,6 @@
-import 'grid_position.dart';
+import 'package:arcade/features/arcade/world/grid_position.dart';
 
 class ArcadeWorldConfig {
-  const ArcadeWorldConfig({
-    this.width = 15,
-    this.height = 15,
-    this.tileWidth = 64,
-    this.tileHeight = 32,
-    this.spawnPosition,
-  });
-
   final int width;
   final int height;
 
@@ -17,11 +9,15 @@ class ArcadeWorldConfig {
 
   final GridPosition? spawnPosition;
 
+  const ArcadeWorldConfig({
+    this.width = 15,
+    this.height = 15,
+    this.tileWidth = 64,
+    this.tileHeight = 32,
+    this.spawnPosition,
+  });
+
   GridPosition get resolvedSpawnPosition {
-    return spawnPosition ??
-        GridPosition(
-          width ~/ 2,
-          height ~/ 2,
-        );
+    return spawnPosition ?? GridPosition(width ~/ 2, height ~/ 2);
   }
 }

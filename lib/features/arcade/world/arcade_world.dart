@@ -1,23 +1,24 @@
-import 'arcade_world_config.dart';
-import 'grid_position.dart';
+import 'package:arcade/features/arcade/world/arcade_grid.dart';
+import 'package:arcade/features/arcade/world/arcade_world_config.dart';
+import 'package:arcade/features/arcade/world/grid_position.dart';
 
 class ArcadeWorld {
-  ArcadeWorld({
-    this.config = const ArcadeWorldConfig(),
-  }) : playerPosition = config.resolvedSpawnPosition;
-
   final ArcadeWorldConfig config;
+
+  final ArcadeGrid grid;
 
   GridPosition playerPosition;
 
-  int get width => config.width;
-  int get height => config.height;
+  ArcadeWorld({this.config = const ArcadeWorldConfig()})
+    : grid = ArcadeGrid(width: config.width, height: config.height),
+      playerPosition = config.resolvedSpawnPosition {
+    buildPrototypeWalls();
+  }
 
-  bool isInside(GridPosition position) {
-    return position.x >= 0 &&
-        position.x < width &&
-        position.y >= 0 &&
-        position.y < height;
+  void buildPrototypeWalls() {
+    for (var x = 3; x < 12; x++) {
+      grid.setCell(GridPosition(x, 7), .wall);
+    }
   }
 
   bool movePlayer(int dx, int dy) {
@@ -26,11 +27,10 @@ class ArcadeWorld {
       y: playerPosition.y + dy,
     );
 
-    if (!isInside(nextPosition)) {
-      return false;
-    }
+    if (!grid.isWalkable(nextPosition)) return false;
 
     playerPosition = nextPosition;
+
     return true;
   }
 }
