@@ -1,14 +1,16 @@
 import 'dart:async';
 
 import 'package:arcade/features/arcade/world/arcade_camera.dart';
+import 'package:arcade/features/arcade/world/arcade_player_3d.dart';
 import 'package:arcade/features/arcade/world/arcade_world.dart';
-import 'package:arcade/features/arcade/world/arcade_world_config.dart';
+import 'package:arcade/features/arcade/world/arcade_world_loader.dart';
 import 'package:arcade/features/arcade/world/arcade_world_painter.dart';
 import 'package:arcade/features/arcade/world/grid_position.dart';
 import 'package:arcade/features/arcade/world/isometric_projection.dart';
 import 'package:arcade/features/arcade/world/path_finder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 
 class ArcadeScreen extends StatefulWidget {
   const ArcadeScreen({super.key});
@@ -19,13 +21,18 @@ class ArcadeScreen extends StatefulWidget {
 
 class _ArcadeScreenState extends State<ArcadeScreen>
     with SingleTickerProviderStateMixin {
+  static const playerCameraElevation = 54.736;
+  static const playerCameraRadius = 90.0;
+
+  late final Flutter3DController _playerController;
+
   late final AnimationController _cameraController;
 
-  late final ArcadeWorld world;
+  late final ArcadeWorldLoader worldLoader;
 
   late final ArcadeCamera camera;
 
-  late final IsometricProjection projection;
+  late IsometricProjection projection;
 
   final Set<LogicalKeyboardKey> _heldKeys = {};
 
@@ -35,33 +42,37 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
   Timer? _movementTimer;
 
+  ArcadeWorld? world;
+
   @override
   void initState() {
     super.initState();
 
-    world = ArcadeWorld(
-      config: ArcadeWorldConfig(
-        width: 30,
-        height: 20,
-        tileWidth: 72,
-        tileHeight: 36,
-        spawnPosition: GridPosition(15, 10),
-      ),
-    );
+    _playerController = Flutter3DController();
 
-    projection = IsometricProjection(
-      tileWidth: world.config.tileWidth,
-      tileHeight: world.config.tileHeight,
-    );
+    _playerController.onModelLoaded.addListener(() {
+      debugPrint(
+        'Player model loaded: '
+        '${_playerController.onModelLoaded.value}',
+      );
+    });
+
+    _playerController.onModelLoaded.addListener(() async {
+      final animations = await _playerController.getAvailableAnimations();
+
+      debugPrint('Player animations: $animations');
+    });
+
+    worldLoader = ArcadeWorldLoader();
 
     camera = ArcadeCamera();
-    camera.follow(world.playerPosition, projection: projection);
 
-    _cameraController =
-        AnimationController(vsync: this, duration: Duration(seconds: 1))
-          ..addListener(() {
-            setState(() => camera.update());
-          });
+    _loadWorld();
+
+    _cameraController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    )..addListener(() => _updateCamera);
     _cameraController.repeat();
 
     _movementTimer = Timer.periodic(
@@ -79,6 +90,35 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     super.dispose();
   }
 
+  void _updateCamera() {
+    if (!mounted || world == null || !_playerController.onModelLoaded.value) {
+      return;
+    }
+
+    camera.update();
+
+    setState(() {});
+  }
+
+  Future<void> _loadWorld() async {
+    final layout = await worldLoader.load('assets/worlds/arcade_world.json');
+
+    final loadedWorld = ArcadeWorld(layout: layout);
+
+    final loadedProjection = IsometricProjection(tileWidth: 72, tileHeight: 36);
+
+    camera.follow(loadedWorld.playerPosition, projection: loadedProjection);
+
+    if (!mounted) return;
+
+    setState(() {
+      world = loadedWorld;
+      projection = loadedProjection;
+    });
+
+    _updatePlayerView();
+  }
+
   GridPosition _screenToGrid(Offset screenPosition, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final cameraOffset = center - camera.position;
@@ -88,13 +128,15 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   }
 
   void _handleTap(Offset position, Size size) {
+    if (world == null) return;
+
     final target = _screenToGrid(position, size);
 
-    if (!world.grid.isWalkable(target)) return;
+    if (!world!.grid.isWalkable(target)) return;
 
     final path = pathFinder.findPath(
-      grid: world.grid,
-      start: world.playerPosition,
+      grid: world!.grid,
+      start: world!.playerPosition,
       goal: target,
     );
 
@@ -104,6 +146,10 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   }
 
   void _updateMovement() {
+    if (world == null) return;
+
+    _updatePlayerView();
+
     if (_heldKeys.isNotEmpty) {
       _moveFromHeldKeys();
 
@@ -114,12 +160,12 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     final next = _path.removeAt(0);
 
-    final dx = next.x - world.playerPosition.x;
-    final dy = next.y - world.playerPosition.y;
+    final dx = next.x - world!.playerPosition.x;
+    final dy = next.y - world!.playerPosition.y;
 
-    if (world.movePlayer(dx, dy)) {
+    if (world!.movePlayer(dx, dy)) {
       setState(() {
-        camera.follow(world.playerPosition, projection: projection);
+        camera.follow(world!.playerPosition, projection: projection);
       });
     } else {
       setState(() => _path.clear());
@@ -164,6 +210,10 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   }
 
   void _moveFromHeldKeys() {
+    if (world == null) return;
+
+    _updatePlayerView();
+
     var dx = 0;
     var dy = 0;
 
@@ -189,17 +239,42 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     if (dx == 0 && dy == 0) return;
 
-    if (world.movePlayer(dx, dy)) {
+    if (world!.movePlayer(dx, dy)) {
       setState(() {
-        camera.follow(world.playerPosition, projection: projection);
+        camera.follow(world!.playerPosition, projection: projection);
       });
     }
 
     if (dx != 0) dy = 0;
   }
 
+  void _updatePlayerView() {
+    final currentWorld = world;
+
+    if (currentWorld == null) return;
+
+    final orbit = switch (currentWorld.playerDirection) {
+      .north => 45.0,
+      .east => 135.0,
+      .south => 225.0,
+      .west => 315.0,
+    };
+
+    _playerController.setCameraOrbit(
+      orbit,
+      playerCameraElevation,
+      playerCameraRadius,
+    );
+  }
+
   @override
   Widget build(_) {
+    final currentWorld = world;
+
+    if (currentWorld == null) {
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       body: Focus(
         autofocus: true,
@@ -208,18 +283,34 @@ class _ArcadeScreenState extends State<ArcadeScreen>
           builder: (context, constraints) {
             final size = Size(constraints.maxWidth, constraints.maxHeight);
 
+            final center = Offset(size.width / 2, size.height / 2);
+
+            final cameraOffset = center - camera.position;
+
+            final playerScreenPosition =
+                cameraOffset +
+                projection.worldToScreen(currentWorld.playerPosition);
+
             return GestureDetector(
               behavior: .opaque,
               onTapDown: (details) {
                 _handleTap(details.localPosition, size);
               },
-              child: CustomPaint(
-                painter: ArcadeWorldPainter(
-                  world: world,
-                  camera: camera,
-                  projection: projection,
-                ),
-                size: size,
+              child: Stack(
+                children: [
+                  CustomPaint(
+                    painter: ArcadeWorldPainter(
+                      world: currentWorld,
+                      camera: camera,
+                      projection: projection,
+                    ),
+                    size: size,
+                  ),
+                  ArcadePlayer3D(
+                    screenPosition: playerScreenPosition,
+                    controller: _playerController,
+                  ),
+                ],
               ),
             );
           },

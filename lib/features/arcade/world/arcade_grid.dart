@@ -1,15 +1,18 @@
+import 'package:arcade/features/arcade/world/arcade_cell.dart';
 import 'package:arcade/features/arcade/world/grid_position.dart';
-
-enum GridCellType { floor, wall }
+import 'package:arcade/features/arcade/world/terrain_type.dart';
 
 class ArcadeGrid {
   final int width;
   final int height;
 
-  final List<List<GridCellType>> _cells;
+  final List<List<ArcadeCell>> _cells;
 
   ArcadeGrid({required this.width, required this.height})
-    : _cells = List.generate(height, (_) => List.filled(width, .floor));
+    : _cells = List.generate(
+        height,
+        (_) => List.generate(width, (_) => ArcadeCell()),
+      );
 
   bool isInside(GridPosition position) {
     return position.x >= 0 &&
@@ -18,7 +21,7 @@ class ArcadeGrid {
         position.y < height;
   }
 
-  GridCellType cellAt(GridPosition position) {
+  ArcadeCell cellAt(GridPosition position) {
     if (!isInside(position)) {
       throw RangeError('Position is outside the grid: $position');
     }
@@ -26,15 +29,15 @@ class ArcadeGrid {
     return _cells[position.y][position.x];
   }
 
-  void setCell(GridPosition position, GridCellType type) {
+  void setTerrain(GridPosition position, TerrainType terrain) {
     if (!isInside(position)) {
       throw RangeError('Position is outside the grid: $position');
     }
 
-    _cells[position.y][position.x] = type;
+    _cells[position.y][position.x].terrain = terrain;
   }
 
   bool isWalkable(GridPosition position) {
-    return isInside(position) && cellAt(position) == .floor;
+    return isInside(position) && cellAt(position).terrain == .floor;
   }
 }

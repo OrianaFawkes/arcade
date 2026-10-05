@@ -17,8 +17,8 @@ class ArcadeWorldPainter extends CustomPainter {
     required this.projection,
   });
 
-  double get tileWidth => world.config.tileWidth;
-  double get tileHeight => world.config.tileHeight;
+  double get tileWidth => projection.tileWidth;
+  double get tileHeight => projection.tileHeight;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -43,14 +43,18 @@ class ArcadeWorldPainter extends CustomPainter {
           ..lineTo(screenPosition.dx - tileWidth / 2, screenPosition.dy)
           ..close();
 
-        final cellType = world.grid.cellAt(position);
+        final cell = world.grid.cellAt(position);
 
-        if (cellType == .wall) {
-          final wallPaint = Paint()..style = .fill;
+        switch (cell.terrain) {
+          case .floor:
+            canvas.drawPath(path, paint);
 
-          canvas.drawPath(path, wallPaint);
-        } else {
-          canvas.drawPath(path, paint);
+          case .wall:
+            final wallPaint = Paint()..style = .fill;
+            canvas.drawPath(path, wallPaint);
+
+          case .void_:
+            break;
         }
       }
     }
