@@ -40,7 +40,9 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
   List<GridPosition> _path = [];
 
-  Timer? _movementTimer;
+  Timer? _movementRepeatStartTimer;
+  Timer? _movementRepeatTimer;
+  Timer? _pathMovementTimer;
 
   ArcadeWorld? world;
 
@@ -74,18 +76,15 @@ class _ArcadeScreenState extends State<ArcadeScreen>
       duration: Duration(seconds: 1),
     )..addListener(() => _updateCamera);
     _cameraController.repeat();
-
-    _movementTimer = Timer.periodic(
-      Duration(milliseconds: 120),
-      (_) => _updateMovement(),
-    );
   }
 
   @override
   void dispose() {
-    _cameraController.dispose();
+    _movementRepeatStartTimer?.cancel();
+    _movementRepeatTimer?.cancel();
+    _pathMovementTimer?.cancel();
 
-    _movementTimer?.cancel();
+    _cameraController.dispose();
 
     super.dispose();
   }
@@ -115,8 +114,6 @@ class _ArcadeScreenState extends State<ArcadeScreen>
       world = loadedWorld;
       projection = loadedProjection;
     });
-
-    _updatePlayerView();
   }
 
   GridPosition _screenToGrid(Offset screenPosition, Size size) {
@@ -128,69 +125,91 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   }
 
   void _handleTap(Offset position, Size size) {
-    if (world == null) return;
+    final currentWorld = world;
+
+    if (currentWorld == null) return;
 
     final target = _screenToGrid(position, size);
 
-    if (!world!.grid.isWalkable(target)) return;
+    if (!currentWorld.grid.isWalkable(target)) return;
 
     final path = pathFinder.findPath(
-      grid: world!.grid,
-      start: world!.playerPosition,
+      grid: currentWorld.grid,
+      start: currentWorld.playerPosition,
       goal: target,
     );
 
-    if (path == null) return;
+    if (path == null || path.length < 2) return;
 
-    setState(() => _path = path.skip(1).toList());
+    _path = path.skip(1).toList();
+
+    _startPathMovement();
   }
 
-  void _updateMovement() {
-    if (world == null) return;
+  void _updatePathMovement() {
+    final currentWorld = world;
 
-    _updatePlayerView();
-
-    if (_heldKeys.isNotEmpty) {
-      _moveFromHeldKeys();
+    if (currentWorld == null || _path.isEmpty) {
+      _pathMovementTimer?.cancel();
+      _pathMovementTimer = null;
 
       return;
     }
 
-    if (_path.isEmpty) return;
-
     final next = _path.removeAt(0);
 
-    final dx = next.x - world!.playerPosition.x;
-    final dy = next.y - world!.playerPosition.y;
+    final dx = next.x - currentWorld.playerPosition.x;
+    final dy = next.y - currentWorld.playerPosition.y;
 
-    if (world!.movePlayer(dx, dy)) {
-      setState(() {
-        camera.follow(world!.playerPosition, projection: projection);
-      });
-    } else {
-      setState(() => _path.clear());
+    setState(() {
+      if (currentWorld.movePlayer(dx, dy)) {
+        camera.follow(currentWorld.playerPosition, projection: projection);
+
+        _updatePlayerView();
+      } else {
+        _path.clear();
+      }
+    });
+
+    if (_path.isEmpty) {
+      _pathMovementTimer?.cancel();
+      _pathMovementTimer = null;
     }
   }
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    final key = event.logicalKey;
+
+    if (!_isMovementKey(key)) return .ignored;
+
     if (event is KeyDownEvent) {
-      final key = event.logicalKey;
+      // Ignore browser/OS key-repeat events.
+      //
+      // The Set tells us whether this is the first key-down
+      // for this physical key.
+      final isNewKey = _heldKeys.add(key);
 
-      if (_isMovementKey(key)) {
-        _heldKeys.add(key);
+      if (!isNewKey) return .handled;
 
-        // Cancel an existing click-to-move path.
-        _path.clear();
+      // Keyboard movement takes priority over an existing
+      // click-to-move path.
+      _path.clear();
 
-        // Move immediately rather than waiting for the timer.
-        _moveFromHeldKeys();
+      _stopPathMovement();
 
-        return .handled;
-      }
+      // One physical key press = exactly one movement.
+      _moveFromHeldKeys();
+
+      // Start controlled key-repeat after a short delay.
+      _startMovementRepeat();
+
+      return .handled;
     }
 
     if (event is KeyUpEvent) {
-      _heldKeys.remove(event.logicalKey);
+      _heldKeys.remove(key);
+
+      if (_heldKeys.isEmpty) _stopMovementRepeat();
 
       return .handled;
     }
@@ -209,10 +228,52 @@ class _ArcadeScreenState extends State<ArcadeScreen>
         key == .keyD;
   }
 
-  void _moveFromHeldKeys() {
-    if (world == null) return;
+  void _startMovementRepeat() {
+    _movementRepeatStartTimer?.cancel();
+    _movementRepeatTimer?.cancel();
 
-    _updatePlayerView();
+    _movementRepeatStartTimer = Timer(Duration(milliseconds: 250), () {
+      if (_heldKeys.isEmpty) return;
+
+      _moveFromHeldKeys();
+
+      _movementRepeatTimer = Timer.periodic(Duration(milliseconds: 120), (_) {
+        if (_heldKeys.isEmpty) {
+          _stopMovementRepeat();
+
+          return;
+        }
+
+        _moveFromHeldKeys();
+      });
+    });
+  }
+
+  void _startPathMovement() {
+    _stopPathMovement();
+
+    _pathMovementTimer = Timer.periodic(Duration(milliseconds: 150), (_) {
+      _updatePathMovement();
+    });
+  }
+
+  void _stopMovementRepeat() {
+    _movementRepeatStartTimer?.cancel();
+    _movementRepeatStartTimer = null;
+
+    _movementRepeatTimer?.cancel();
+    _movementRepeatTimer = null;
+  }
+
+  void _stopPathMovement() {
+    _pathMovementTimer?.cancel();
+    _pathMovementTimer = null;
+  }
+
+  void _moveFromHeldKeys() {
+    final currentWorld = world;
+
+    if (currentWorld == null) return;
 
     var dx = 0;
     var dy = 0;
@@ -220,35 +281,31 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     if (_heldKeys.contains(LogicalKeyboardKey.arrowUp) ||
         _heldKeys.contains(LogicalKeyboardKey.keyW)) {
       dy = -1;
-    }
-
-    if (_heldKeys.contains(LogicalKeyboardKey.arrowDown) ||
+    } else if (_heldKeys.contains(LogicalKeyboardKey.arrowDown) ||
         _heldKeys.contains(LogicalKeyboardKey.keyS)) {
       dy = 1;
-    }
-
-    if (_heldKeys.contains(LogicalKeyboardKey.arrowLeft) ||
+    } else if (_heldKeys.contains(LogicalKeyboardKey.arrowLeft) ||
         _heldKeys.contains(LogicalKeyboardKey.keyA)) {
       dx = -1;
-    }
-
-    if (_heldKeys.contains(LogicalKeyboardKey.arrowRight) ||
+    } else if (_heldKeys.contains(LogicalKeyboardKey.arrowRight) ||
         _heldKeys.contains(LogicalKeyboardKey.keyD)) {
       dx = 1;
     }
 
     if (dx == 0 && dy == 0) return;
 
-    if (world!.movePlayer(dx, dy)) {
-      setState(() {
-        camera.follow(world!.playerPosition, projection: projection);
-      });
-    }
+    setState(() {
+      if (currentWorld.movePlayer(dx, dy)) {
+        camera.follow(currentWorld.playerPosition, projection: projection);
+      }
 
-    if (dx != 0) dy = 0;
+      _updatePlayerView();
+    });
   }
 
   void _updatePlayerView() {
+    if (!_playerController.onModelLoaded.value) return;
+
     final currentWorld = world;
 
     if (currentWorld == null) return;
@@ -278,6 +335,13 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     return Scaffold(
       body: Focus(
         autofocus: true,
+        onFocusChange: (hasFocus) {
+          if (!hasFocus) {
+            _heldKeys.clear();
+
+            _stopMovementRepeat();
+          }
+        },
         onKeyEvent: _handleKeyEvent,
         child: LayoutBuilder(
           builder: (context, constraints) {
