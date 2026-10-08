@@ -1,70 +1,69 @@
 import 'package:arcade/features/arcade/world/arcade_camera.dart';
 import 'package:arcade/features/arcade/world/arcade_world.dart';
 import 'package:arcade/features/arcade/world/grid_position.dart';
-import 'package:arcade/features/arcade/world/isometric_projection.dart';
+import 'package:arcade/features/arcade/world/top_down_projection.dart';
 import 'package:flutter/material.dart';
 
 class ArcadeWorldPainter extends CustomPainter {
   final ArcadeWorld world;
-
   final ArcadeCamera camera;
+  final TopDownProjection projection;
 
-  final IsometricProjection projection;
-
-  ArcadeWorldPainter({
+  const ArcadeWorldPainter({
     required this.world,
     required this.camera,
     required this.projection,
   });
 
-  double get tileWidth => projection.tileWidth;
-  double get tileHeight => projection.tileHeight;
-
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = .stroke
-      ..strokeWidth = 1;
-
     final center = Offset(size.width / 2, size.height / 2);
-
     final cameraOffset = center - camera.position;
+
+    final floorPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = const Color(0xFF3A3A3A);
+
+    final wallPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = const Color(0xFF111111);
+
+    final gridPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = const Color(0xFF666666);
 
     for (var y = 0; y < world.grid.height; y++) {
       for (var x = 0; x < world.grid.width; x++) {
         final position = GridPosition(x, y);
-        final screenPosition =
-            cameraOffset + projection.worldToScreen(position);
-
-        final path = Path()
-          ..moveTo(screenPosition.dx, screenPosition.dy - tileHeight / 2)
-          ..lineTo(screenPosition.dx + tileWidth / 2, screenPosition.dy)
-          ..lineTo(screenPosition.dx, screenPosition.dy + tileHeight / 2)
-          ..lineTo(screenPosition.dx - tileWidth / 2, screenPosition.dy)
-          ..close();
-
         final cell = world.grid.cellAt(position);
+
+        if (cell.terrain == .void_) {
+          continue;
+        }
+
+        final tileCenter = cameraOffset + projection.worldToScreen(position);
+
+        final rect = Rect.fromCenter(
+          center: tileCenter,
+          width: projection.tileWidth,
+          height: projection.tileHeight,
+        );
 
         switch (cell.terrain) {
           case .floor:
-            canvas.drawPath(path, paint);
+            canvas.drawRect(rect, floorPaint);
+            canvas.drawRect(rect, gridPaint);
 
           case .wall:
-            final wallPaint = Paint()..style = .fill;
-            canvas.drawPath(path, wallPaint);
+            canvas.drawRect(rect, wallPaint);
+            canvas.drawRect(rect, gridPaint);
 
           case .void_:
             break;
         }
       }
     }
-
-    final playerPosition =
-        cameraOffset + projection.worldToScreen(world.playerPosition);
-
-    final playerPaint = Paint()..style = .fill;
-
-    canvas.drawCircle(playerPosition.translate(0, -12), 10, playerPaint);
   }
 
   @override

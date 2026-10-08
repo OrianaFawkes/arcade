@@ -1,16 +1,15 @@
 import 'dart:async';
 
 import 'package:arcade/features/arcade/world/arcade_camera.dart';
-import 'package:arcade/features/arcade/world/arcade_player_3d.dart';
+import 'package:arcade/features/arcade/world/arcade_player_painter.dart';
 import 'package:arcade/features/arcade/world/arcade_world.dart';
 import 'package:arcade/features/arcade/world/arcade_world_loader.dart';
 import 'package:arcade/features/arcade/world/arcade_world_painter.dart';
 import 'package:arcade/features/arcade/world/grid_position.dart';
-import 'package:arcade/features/arcade/world/isometric_projection.dart';
+import 'package:arcade/features/arcade/world/top_down_projection.dart';
 import 'package:arcade/features/arcade/world/path_finder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 
 class ArcadeScreen extends StatefulWidget {
   const ArcadeScreen({super.key});
@@ -21,18 +20,13 @@ class ArcadeScreen extends StatefulWidget {
 
 class _ArcadeScreenState extends State<ArcadeScreen>
     with SingleTickerProviderStateMixin {
-  static const playerCameraElevation = 54.736;
-  static const playerCameraRadius = 90.0;
-
-  late final Flutter3DController _playerController;
-
   late final AnimationController _cameraController;
 
   late final ArcadeWorldLoader worldLoader;
 
   late final ArcadeCamera camera;
 
-  late IsometricProjection projection;
+  late TopDownProjection projection;
 
   final Set<LogicalKeyboardKey> _heldKeys = {};
 
@@ -49,21 +43,6 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   @override
   void initState() {
     super.initState();
-
-    _playerController = Flutter3DController();
-
-    _playerController.onModelLoaded.addListener(() {
-      debugPrint(
-        'Player model loaded: '
-        '${_playerController.onModelLoaded.value}',
-      );
-    });
-
-    _playerController.onModelLoaded.addListener(() async {
-      final animations = await _playerController.getAvailableAnimations();
-
-      debugPrint('Player animations: $animations');
-    });
 
     worldLoader = ArcadeWorldLoader();
 
@@ -90,9 +69,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   }
 
   void _updateCamera() {
-    if (!mounted || world == null || !_playerController.onModelLoaded.value) {
-      return;
-    }
+    if (!mounted || world == null) return;
 
     camera.update();
 
@@ -104,9 +81,11 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     final loadedWorld = ArcadeWorld(layout: layout);
 
-    final loadedProjection = IsometricProjection(tileWidth: 72, tileHeight: 36);
+    final loadedProjection = TopDownProjection(tileWidth: 48, tileHeight: 32);
 
     camera.follow(loadedWorld.playerPosition, projection: loadedProjection);
+
+    camera.position = camera.target;
 
     if (!mounted) return;
 
@@ -164,8 +143,6 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     setState(() {
       if (currentWorld.movePlayer(dx, dy)) {
         camera.follow(currentWorld.playerPosition, projection: projection);
-
-        _updatePlayerView();
       } else {
         _path.clear();
       }
@@ -298,30 +275,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
       if (currentWorld.movePlayer(dx, dy)) {
         camera.follow(currentWorld.playerPosition, projection: projection);
       }
-
-      _updatePlayerView();
     });
-  }
-
-  void _updatePlayerView() {
-    if (!_playerController.onModelLoaded.value) return;
-
-    final currentWorld = world;
-
-    if (currentWorld == null) return;
-
-    final orbit = switch (currentWorld.playerDirection) {
-      .north => 45.0,
-      .east => 135.0,
-      .south => 225.0,
-      .west => 315.0,
-    };
-
-    _playerController.setCameraOrbit(
-      orbit,
-      playerCameraElevation,
-      playerCameraRadius,
-    );
   }
 
   @override
@@ -370,9 +324,10 @@ class _ArcadeScreenState extends State<ArcadeScreen>
                     ),
                     size: size,
                   ),
-                  ArcadePlayer3D(
+                  ArcadePlayerPainter(
                     screenPosition: playerScreenPosition,
-                    controller: _playerController,
+                    direction: currentWorld.playerDirection,
+                    isMoving: true,
                   ),
                 ],
               ),

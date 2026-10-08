@@ -1,5 +1,5 @@
 import 'package:arcade/features/arcade/world/grid_position.dart';
-import 'package:arcade/features/arcade/world/isometric_projection.dart';
+import 'package:arcade/features/arcade/world/top_down_projection.dart';
 import 'package:flutter/material.dart';
 
 class ArcadeCamera {
@@ -12,7 +12,7 @@ class ArcadeCamera {
 
   void follow(
     GridPosition targetPosition, {
-    required IsometricProjection projection,
+    required TopDownProjection projection,
   }) {
     target = projection.worldToScreen(targetPosition);
   }

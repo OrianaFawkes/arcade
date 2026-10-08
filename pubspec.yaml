@@ -11,7 +11,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_3d_controller: ^2.3.0
   flutter_web_plugins:
     sdk: flutter
   go_router: ^17.5.0
@@ -33,5 +32,5 @@ flutter:
         - asset: assets/fonts/DepartureMono/DepartureMono-Regular.otf
 
   assets:
+    - assets/sprites/player/
     - assets/worlds/
-    - assets/models/characters/
