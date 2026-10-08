@@ -17,6 +17,15 @@ class ArcadeCamera {
     target = projection.worldToScreen(targetPosition);
   }
 
+  void snapTo(
+    GridPosition targetPosition, {
+    required TopDownProjection projection,
+  }) {
+    target = projection.worldToScreen(targetPosition);
+
+    position = target;
+  }
+
   void update() {
     position += (target - position) * smoothing;
   }

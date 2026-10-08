@@ -10,6 +10,7 @@ import 'package:arcade/features/arcade/world/top_down_projection.dart';
 import 'package:arcade/features/arcade/world/path_finder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 class ArcadeScreen extends StatefulWidget {
   const ArcadeScreen({super.key});
@@ -24,7 +25,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
   late final ArcadeWorldLoader worldLoader;
 
-  late final ArcadeCamera camera;
+  late final ArcadeCamera _camera;
 
   late TopDownProjection projection;
 
@@ -46,7 +47,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     worldLoader = ArcadeWorldLoader();
 
-    camera = ArcadeCamera();
+    _camera = ArcadeCamera();
 
     _loadWorld();
 
@@ -71,7 +72,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   void _updateCamera() {
     if (!mounted || world == null) return;
 
-    camera.update();
+    _camera.update();
 
     setState(() {});
   }
@@ -81,11 +82,9 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     final loadedWorld = ArcadeWorld(layout: layout);
 
-    final loadedProjection = TopDownProjection(tileWidth: 48, tileHeight: 32);
+    final loadedProjection = TopDownProjection(tileWidth: 80, tileHeight: 60);
 
-    camera.follow(loadedWorld.playerPosition, projection: loadedProjection);
-
-    camera.position = camera.target;
+    _camera.snapTo(loadedWorld.playerPosition, projection: loadedProjection);
 
     if (!mounted) return;
 
@@ -97,7 +96,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
   GridPosition _screenToGrid(Offset screenPosition, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final cameraOffset = center - camera.position;
+    final cameraOffset = center - _camera.position;
     final worldScreenPosition = screenPosition - cameraOffset;
 
     return projection.screenToGrid(worldScreenPosition);
@@ -142,7 +141,10 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     setState(() {
       if (currentWorld.movePlayer(dx, dy)) {
-        camera.follow(currentWorld.playerPosition, projection: projection);
+        // follow
+        _camera.snapTo(currentWorld.playerPosition, projection: projection);
+
+        _camera.update();
       } else {
         _path.clear();
       }
@@ -273,7 +275,10 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     setState(() {
       if (currentWorld.movePlayer(dx, dy)) {
-        camera.follow(currentWorld.playerPosition, projection: projection);
+        // follow
+        _camera.snapTo(currentWorld.playerPosition, projection: projection);
+
+        _camera.update();
       }
     });
   }
@@ -303,7 +308,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
             final center = Offset(size.width / 2, size.height / 2);
 
-            final cameraOffset = center - camera.position;
+            final cameraOffset = center - _camera.position;
 
             final playerScreenPosition =
                 cameraOffset +
@@ -319,7 +324,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
                   CustomPaint(
                     painter: ArcadeWorldPainter(
                       world: currentWorld,
-                      camera: camera,
+                      camera: _camera,
                       projection: projection,
                     ),
                     size: size,
