@@ -2,10 +2,14 @@ import 'dart:async';
 
 import 'package:arcade/features/arcade/world/arcade_camera.dart';
 import 'package:arcade/features/arcade/world/arcade_player_painter.dart';
+import 'package:arcade/features/arcade/world/arcade_station.dart';
+import 'package:arcade/features/arcade/world/arcade_station_placeholder.dart';
+import 'package:arcade/features/arcade/world/arcade_wall_placeholder.dart';
 import 'package:arcade/features/arcade/world/arcade_world.dart';
 import 'package:arcade/features/arcade/world/arcade_world_loader.dart';
 import 'package:arcade/features/arcade/world/arcade_world_painter.dart';
 import 'package:arcade/features/arcade/world/grid_position.dart';
+import 'package:arcade/features/arcade/world/player_direction.dart';
 import 'package:arcade/features/arcade/world/top_down_projection.dart';
 import 'package:arcade/features/arcade/world/path_finder.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +58,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     _cameraController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 1),
-    )..addListener(() => _updateCamera);
+    )..addListener(_updateCamera);
     _cameraController.repeat();
   }
 
@@ -82,7 +86,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     final loadedWorld = ArcadeWorld(layout: layout);
 
-    final loadedProjection = TopDownProjection(tileWidth: 80, tileHeight: 60);
+    final loadedProjection = TopDownProjection(tileWidth: 40, tileHeight: 20);
 
     _camera.snapTo(loadedWorld.playerPosition, projection: loadedProjection);
 
@@ -159,6 +163,14 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
     final key = event.logicalKey;
 
+    if (event.logicalKey == .keyE ||
+        event.logicalKey == .enter ||
+        event.logicalKey == .numpadEnter) {
+      _tryInteract();
+
+      return .handled;
+    }
+
     if (!_isMovementKey(key)) return .ignored;
 
     if (event is KeyDownEvent) {
@@ -186,9 +198,11 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     }
 
     if (event is KeyUpEvent) {
-      _heldKeys.remove(key);
+      final wasHeld = _heldKeys.remove(key);
 
       if (_heldKeys.isEmpty) _stopMovementRepeat();
+
+      if (wasHeld && mounted) setState(() {});
 
       return .handled;
     }
@@ -273,14 +287,75 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     if (dx == 0 && dy == 0) return;
 
+    // setState(() {
+    //   if (currentWorld.movePlayer(dx, dy)) {
+    //     // follow
+    //     _camera.snapTo(currentWorld.playerPosition, projection: projection);
+
+    //     _camera.update();
+    //   }
+    // });
+    final target = currentWorld.playerPosition.copyWith(
+      x: currentWorld.playerPosition.x + dx,
+      y: currentWorld.playerPosition.y + dy,
+    );
+
     setState(() {
       if (currentWorld.movePlayer(dx, dy)) {
-        // follow
         _camera.snapTo(currentWorld.playerPosition, projection: projection);
-
         _camera.update();
       }
     });
+  }
+
+  GridPosition _positionInFrontOfPlayer() {
+    final position = world!.playerPosition;
+
+    return switch (world!.playerDirection) {
+      PlayerDirection.north => position.copyWith(y: position.y - 1),
+      PlayerDirection.east => position.copyWith(x: position.x + 1),
+      PlayerDirection.south => position.copyWith(y: position.y + 1),
+      PlayerDirection.west => position.copyWith(x: position.x - 1),
+    };
+  }
+
+  void _tryInteract() {
+    final currentWorld = world;
+    if (currentWorld == null) return;
+
+    final targetPosition = _positionInFrontOfPlayer();
+
+    ArcadeStation? targetStation;
+
+    for (final station in currentWorld.stations) {
+      if (station.position == targetPosition) {
+        targetStation = station;
+        break;
+      }
+    }
+
+    if (targetStation == null) return;
+
+    final station = _stationInFrontOfPlayer();
+
+    if (station == null) return;
+
+    context.go(targetStation.routeName);
+  }
+
+  ArcadeStation? _stationInFrontOfPlayer() {
+    final currentWorld = world;
+    if (currentWorld == null) return null;
+
+    final targetPosition = _positionInFrontOfPlayer();
+
+    for (final station in currentWorld.stations) {
+      if (station.position == targetPosition) {
+        return station;
+      }
+    }
+
+    return null;
   }
 
   @override
@@ -297,8 +372,11 @@ class _ArcadeScreenState extends State<ArcadeScreen>
         onFocusChange: (hasFocus) {
           if (!hasFocus) {
             _heldKeys.clear();
-
             _stopMovementRepeat();
+
+            if (mounted) {
+              setState(() {});
+            }
           }
         },
         onKeyEvent: _handleKeyEvent,
@@ -314,12 +392,93 @@ class _ArcadeScreenState extends State<ArcadeScreen>
                 cameraOffset +
                 projection.worldToScreen(currentWorld.playerPosition);
 
+            // return GestureDetector(
+            //   behavior: .opaque,
+            //   onTapDown: (details) {
+            //     _handleTap(details.localPosition, size);
+            //   },
+            //   child: Stack(
+            //     children: [
+            //       CustomPaint(
+            //         painter: ArcadeWorldPainter(
+            //           world: currentWorld,
+            //           camera: _camera,
+            //           projection: projection,
+            //         ),
+            //         size: size,
+            //       ),
+            //       ArcadePlayerPainter(
+            //         groundPosition: playerScreenPosition,
+            //         direction: currentWorld.playerDirection,
+            //         isMoving: _heldKeys.isNotEmpty || _path.isNotEmpty,
+            //       ),
+            //     ],
+            //   ),
+            // );
+
+            final depthObjects = <({double depth, Widget widget})>[];
+
+            for (var y = 0; y < currentWorld.grid.height; y++) {
+              for (var x = 0; x < currentWorld.grid.width; x++) {
+                final position = GridPosition(x, y);
+                final cell = currentWorld.grid.cellAt(position);
+
+                if (cell.terrain != .wall) continue;
+
+                final tileCenter =
+                    cameraOffset + projection.worldToScreen(position);
+
+                final groundPosition =
+                    tileCenter + Offset(0, projection.tileHeight / 2);
+
+                depthObjects.add((
+                  depth: groundPosition.dy,
+                  widget: ArcadeWallPlaceholder(
+                    key: ValueKey('wall-$x-$y'),
+                    groundPosition: groundPosition,
+                    tileWidth: projection.tileWidth,
+                    visualHeight: 20,
+                  ),
+                ));
+              }
+            }
+
+            for (final station in currentWorld.stations) {
+              final groundPosition =
+                  cameraOffset + projection.worldToScreen(station.position);
+
+              depthObjects.add((
+                depth: groundPosition.dy,
+                widget: ArcadeStationPlaceholder(
+                  key: ValueKey('station-${station.id}'),
+                  groundPosition: groundPosition,
+                  tileWidth: projection.tileWidth,
+                  visualHeight: 50,
+                  label: station.label,
+                  canInteract: _stationInFrontOfPlayer()?.id == station.id,
+                ),
+              ));
+            }
+
+            depthObjects.add((
+              depth: playerScreenPosition.dy,
+              widget: ArcadePlayerPainter(
+                key: const ValueKey('arcade-player'),
+                groundPosition: playerScreenPosition,
+                direction: currentWorld.playerDirection,
+                isMoving: _heldKeys.any(_isMovementKey) || _path.isNotEmpty,
+              ),
+            ));
+
+            depthObjects.sort((a, b) => a.depth.compareTo(b.depth));
+
             return GestureDetector(
-              behavior: .opaque,
+              behavior: HitTestBehavior.opaque,
               onTapDown: (details) {
                 _handleTap(details.localPosition, size);
               },
               child: Stack(
+                clipBehavior: Clip.hardEdge,
                 children: [
                   CustomPaint(
                     painter: ArcadeWorldPainter(
@@ -329,11 +488,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
                     ),
                     size: size,
                   ),
-                  ArcadePlayerPainter(
-                    screenPosition: playerScreenPosition,
-                    direction: currentWorld.playerDirection,
-                    isMoving: true,
-                  ),
+                  ...depthObjects.map((item) => item.widget),
                 ],
               ),
             );

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:arcade/features/2048/game/game_controller.dart';
 import 'package:arcade/features/2048/models/move_direction.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'board.dart';
@@ -206,6 +207,10 @@ class _A2048ScreenState extends State<A2048Screen> {
         onVerticalDragEnd: _handleSwipe,
         child: Scaffold(
           appBar: AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () => context.go('/'),
+            ),
             title: Text('2048'),
             actions: [
               Padding(

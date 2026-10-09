@@ -1,17 +1,23 @@
+import 'package:arcade/features/arcade/world/arcade_station.dart';
 import 'package:arcade/features/arcade/world/grid_position.dart';
 import 'package:arcade/features/arcade/world/terrain_type.dart';
 
 class ArcadeWorldLayout {
   final int width;
   final int height;
+
   final GridPosition spawnPosition;
+
   final List<List<TerrainType>> terrain;
+
+  final List<ArcadeStation> stations;
 
   const ArcadeWorldLayout({
     required this.width,
     required this.height,
     required this.spawnPosition,
     required this.terrain,
+    required this.stations,
   });
 
   factory ArcadeWorldLayout.fromJson(Map<String, dynamic> json) {
@@ -56,11 +62,22 @@ class ArcadeWorldLayout {
       throw const FormatException('Spawn position must be on a floor tile.');
     }
 
+    final stationRows = json['stations'] as List<dynamic>? ?? [];
+
+    final stations = stationRows.map((row) {
+      if (row is! Map<String, dynamic>) {
+        throw const FormatException('Each station must be a JSON object.');
+      }
+
+      return ArcadeStation.fromJson(row);
+    }).toList();
+
     return ArcadeWorldLayout(
       width: width,
       height: height,
       spawnPosition: spawnPosition,
       terrain: terrain,
+      stations: stations,
     );
   }
 }

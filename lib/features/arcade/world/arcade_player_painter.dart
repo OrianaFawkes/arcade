@@ -1,10 +1,10 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:arcade/features/arcade/world/player_direction.dart';
 import 'package:flutter/material.dart';
 
 class ArcadePlayerPainter extends StatefulWidget {
-  final Offset screenPosition;
+  final Offset groundPosition;
 
   final PlayerDirection direction;
 
@@ -12,7 +12,7 @@ class ArcadePlayerPainter extends StatefulWidget {
 
   const ArcadePlayerPainter({
     super.key,
-    required this.screenPosition,
+    required this.groundPosition,
     required this.direction,
     required this.isMoving,
   });
@@ -23,6 +23,20 @@ class ArcadePlayerPainter extends StatefulWidget {
 
 class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
     with SingleTickerProviderStateMixin {
+  static const _idleRight =
+      'assets/sprites/player/ori_2026-right-standing-24x33.png';
+  static const _idleLeft =
+      'assets/sprites/player/ori_2026-left-standing-24x33.png';
+
+  static const _walkRightA =
+      'assets/sprites/player/ori_2026-right-both-up-30x33.png';
+  static const _walkRightB =
+      'assets/sprites/player/ori_2026-right-both-legs-up-30x31.png';
+  static const _walkLeftA =
+      'assets/sprites/player/ori_2026-left-both-up-30x33.png';
+  static const _walkLeftB =
+      'assets/sprites/player/ori_2026-left-both-legs-up-30x31.png';
+
   late final AnimationController _animationController;
 
   @override
@@ -46,8 +60,9 @@ class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
     if (widget.isMoving && !oldWidget.isMoving) {
       _animationController.repeat();
     } else if (!widget.isMoving && oldWidget.isMoving) {
-      _animationController.stop();
-      _animationController.value = 0;
+      _animationController
+        ..stop()
+        ..value = 0;
     }
   }
 
@@ -57,65 +72,75 @@ class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
     super.dispose();
   }
 
+  bool get _facesRight =>
+      widget.direction == PlayerDirection.east ||
+      widget.direction == PlayerDirection.north;
+
   String get _spriteAsset {
-    final facingRight = widget.direction == .east || widget.direction == .north;
-
-    final walkingFrame = _animationController.value >= 0.5;
-
-    if (facingRight) {
-      return walkingFrame
-          ? 'assets/sprites/player/ori_2026-right-both-legs-up-30x31.png'
-          : 'assets/sprites/player/ori_2026-right-both-up-30x33.png';
+    if (!widget.isMoving) {
+      return _facesRight ? _idleRight : _idleLeft;
     }
 
-    return walkingFrame
-        ? 'assets/sprites/player/ori_2026-left-both-legs-up-30x31.png'
-        : 'assets/sprites/player/ori_2026-left-both-up-30x33.png';
+    final secondFrame = _animationController.value >= 0.5;
+
+    if (_facesRight) {
+      return secondFrame ? _walkRightB : _walkRightA;
+    }
+
+    return secondFrame ? _walkLeftB : _walkLeftA;
   }
 
   double get _bounce {
-    if (!widget.isMoving) {
-      return 0;
-    }
+    if (!widget.isMoving) return 0;
 
-    return -sin(_animationController.value * 2 * pi) * 2;
+    return -math.sin(_animationController.value * 2 * math.pi) * 1.5;
   }
 
   @override
   Widget build(BuildContext context) {
-    const width = 64.0;
-    const height = 64.0;
+    const spriteWidth = 40.0;
+    const spriteHeight = 44.0;
+    const shadowWidth = 20.0;
+    const shadowHeight = 6.0;
 
     return Positioned(
-      left: widget.screenPosition.dx - width / 2,
-      top: widget.screenPosition.dy - height / 2,
-      width: width,
-      height: height,
+      left: widget.groundPosition.dx - spriteWidth / 2,
+      top: widget.groundPosition.dy - spriteHeight,
+      width: spriteWidth,
+      height: spriteHeight,
       child: AnimatedBuilder(
         animation: _animationController,
         builder: (context, child) {
           return Stack(
-            alignment: Alignment.center,
+            clipBehavior: Clip.none,
             children: [
+              // The shadow stays on the ground while the sprite bounces.
               Positioned(
-                bottom: 5,
-                child: Container(
-                  width: 24,
-                  height: 8,
+                left: (spriteWidth - shadowWidth) / 2,
+                bottom: 0,
+                width: shadowWidth,
+                height: shadowHeight,
+                child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.25),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(100),
                   ),
                 ),
               ),
-              Transform.translate(
-                offset: Offset(0, _bounce),
-                child: Image.asset(
-                  _spriteAsset,
-                  width: width,
-                  height: height,
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.none,
+              Positioned(
+                left: 0,
+                bottom: shadowHeight,
+                width: spriteWidth,
+                height: spriteHeight - shadowHeight,
+                child: Transform.translate(
+                  offset: Offset(0, _bounce),
+                  child: Image.asset(
+                    _spriteAsset,
+                    width: spriteWidth,
+                    height: spriteHeight - shadowHeight,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.none,
+                  ),
                 ),
               ),
             ],

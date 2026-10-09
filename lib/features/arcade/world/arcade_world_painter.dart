@@ -38,7 +38,7 @@ class ArcadeWorldPainter extends CustomPainter {
         final position = GridPosition(x, y);
         final cell = world.grid.cellAt(position);
 
-        if (cell.terrain == .void_) {
+        if (cell.terrain == .void_ || cell.terrain == .wall) {
           continue;
         }
 

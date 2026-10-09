@@ -8,6 +8,8 @@ class ArcadeGrid {
 
   final List<List<ArcadeCell>> _cells;
 
+  final Set<GridPosition> _blockedPositions = {};
+
   ArcadeGrid({required this.width, required this.height})
     : _cells = List.generate(
         height,
@@ -37,7 +39,21 @@ class ArcadeGrid {
     _cells[position.y][position.x].terrain = terrain;
   }
 
+  void setBlocked(GridPosition position, bool blocked) {
+    if (!isInside(position)) {
+      throw RangeError('Position is outside the grid: $position');
+    }
+
+    if (blocked) {
+      _blockedPositions.add(position);
+    } else {
+      _blockedPositions.remove(position);
+    }
+  }
+
   bool isWalkable(GridPosition position) {
-    return isInside(position) && cellAt(position).terrain == .floor;
+    return isInside(position) &&
+        cellAt(position).terrain == .floor &&
+        !_blockedPositions.contains(position);
   }
 }
