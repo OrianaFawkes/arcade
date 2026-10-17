@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../game/game_controller.dart';
@@ -146,6 +147,10 @@ class _MinesweeperScreenState extends State<MinesweeperScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => context.go('/'),
+        ),
         title: Text('Minesweeper'),
         actions: [
           Padding(
