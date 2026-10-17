@@ -1,6 +1,6 @@
-import 'package:arcade/features/arcade/world/arcade_cell.dart';
-import 'package:arcade/features/arcade/world/grid_position.dart';
-import 'package:arcade/features/arcade/world/terrain_type.dart';
+import 'package:arcade/features/arcade/domain/arcade_cell.dart';
+import 'package:arcade/features/arcade/domain/grid_position.dart';
+import 'package:arcade/features/arcade/domain/terrain_type.dart';
 
 class ArcadeGrid {
   final int width;

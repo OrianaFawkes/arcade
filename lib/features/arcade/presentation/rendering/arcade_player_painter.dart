@@ -1,19 +1,19 @@
 import 'dart:math' as math;
 
-import 'package:arcade/features/arcade/world/player_direction.dart';
+import 'package:arcade/features/arcade/domain/player_direction.dart';
 import 'package:flutter/material.dart';
 
 class ArcadePlayerPainter extends StatefulWidget {
-  final Offset groundPosition;
-
   final PlayerDirection direction;
+
+  final Offset groundPosition;
 
   final bool isMoving;
 
   const ArcadePlayerPainter({
     super.key,
-    required this.groundPosition,
     required this.direction,
+    required this.groundPosition,
     required this.isMoving,
   });
 
@@ -27,7 +27,6 @@ class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
       'assets/sprites/player/ori_2026-right-standing-24x33.png';
   static const _idleLeft =
       'assets/sprites/player/ori_2026-left-standing-24x33.png';
-
   static const _walkRightA =
       'assets/sprites/player/ori_2026-right-both-up-30x33.png';
   static const _walkRightB =
@@ -45,7 +44,7 @@ class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
 
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 360),
+      duration: Duration(milliseconds: 320),
     );
 
     if (widget.isMoving) {
@@ -69,23 +68,19 @@ class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
   @override
   void dispose() {
     _animationController.dispose();
+
     super.dispose();
   }
 
   bool get _facesRight =>
-      widget.direction == PlayerDirection.east ||
-      widget.direction == PlayerDirection.north;
+      widget.direction == .east || widget.direction == .north;
 
   String get _spriteAsset {
-    if (!widget.isMoving) {
-      return _facesRight ? _idleRight : _idleLeft;
-    }
+    if (!widget.isMoving) return _facesRight ? _idleRight : _idleLeft;
 
     final secondFrame = _animationController.value >= 0.5;
 
-    if (_facesRight) {
-      return secondFrame ? _walkRightB : _walkRightA;
-    }
+    if (_facesRight) return secondFrame ? _walkRightB : _walkRightA;
 
     return secondFrame ? _walkLeftB : _walkLeftA;
   }
@@ -97,11 +92,12 @@ class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(_) {
     const spriteWidth = 40.0;
-    const spriteHeight = 44.0;
-    const shadowWidth = 20.0;
-    const shadowHeight = 6.0;
+    const spriteHeight = 40.0;
+
+    const shadowWidth = 24.0;
+    const shadowHeight = 4.0;
 
     return Positioned(
       left: widget.groundPosition.dx - spriteWidth / 2,
@@ -112,9 +108,8 @@ class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
         animation: _animationController,
         builder: (context, child) {
           return Stack(
-            clipBehavior: Clip.none,
+            clipBehavior: .none,
             children: [
-              // The shadow stays on the ground while the sprite bounces.
               Positioned(
                 left: (spriteWidth - shadowWidth) / 2,
                 bottom: 0,
@@ -123,7 +118,7 @@ class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.25),
-                    borderRadius: BorderRadius.circular(100),
+                    borderRadius: .circular(0.0),
                   ),
                 ),
               ),
@@ -138,8 +133,8 @@ class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
                     _spriteAsset,
                     width: spriteWidth,
                     height: spriteHeight - shadowHeight,
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.none,
+                    fit: .contain,
+                    filterQuality: .none,
                   ),
                 ),
               ),

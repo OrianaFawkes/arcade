@@ -1,6 +1,6 @@
 import 'package:arcade/app/screens/not_found_screen.dart';
 import 'package:arcade/features/2048/presentation/a_2048_screen.dart';
-import 'package:arcade/features/arcade/arcade_screen.dart';
+import 'package:arcade/features/arcade/presentation/arcade_screen.dart';
 import 'package:arcade/features/minesweeper/presentation/minesweeper_screen.dart';
 import 'package:go_router/go_router.dart';
 

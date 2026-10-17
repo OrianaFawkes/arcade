@@ -1,12 +1,14 @@
-import 'package:arcade/features/arcade/world/arcade_camera.dart';
-import 'package:arcade/features/arcade/world/arcade_world.dart';
-import 'package:arcade/features/arcade/world/grid_position.dart';
-import 'package:arcade/features/arcade/world/top_down_projection.dart';
+import 'package:arcade/features/arcade/presentation/camera/arcade_camera.dart';
+import 'package:arcade/features/arcade/domain/arcade_world.dart';
+import 'package:arcade/features/arcade/domain/grid_position.dart';
+import 'package:arcade/features/arcade/presentation/rendering/top_down_projection.dart';
 import 'package:flutter/material.dart';
 
 class ArcadeWorldPainter extends CustomPainter {
   final ArcadeWorld world;
+
   final ArcadeCamera camera;
+
   final TopDownProjection projection;
 
   const ArcadeWorldPainter({

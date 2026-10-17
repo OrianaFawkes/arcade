@@ -1,8 +1,8 @@
-import 'package:arcade/features/arcade/world/arcade_grid.dart';
-import 'package:arcade/features/arcade/world/arcade_station.dart';
-import 'package:arcade/features/arcade/world/arcade_world_layout.dart';
-import 'package:arcade/features/arcade/world/grid_position.dart';
-import 'package:arcade/features/arcade/world/player_direction.dart';
+import 'package:arcade/features/arcade/domain/arcade_grid.dart';
+import 'package:arcade/features/arcade/domain/arcade_station.dart';
+import 'package:arcade/features/arcade/domain/arcade_world_layout.dart';
+import 'package:arcade/features/arcade/domain/grid_position.dart';
+import 'package:arcade/features/arcade/domain/player_direction.dart';
 
 class ArcadeWorld {
   final ArcadeWorldLayout layout;
@@ -13,7 +13,7 @@ class ArcadeWorld {
 
   GridPosition playerPosition;
 
-  PlayerDirection playerDirection = PlayerDirection.south;
+  PlayerDirection playerDirection = .south;
 
   ArcadeWorld({required this.layout})
     : grid = ArcadeGrid(width: layout.width, height: layout.height),
@@ -51,13 +51,13 @@ class ArcadeWorld {
 
   bool movePlayer(int dx, int dy) {
     if (dx > 0) {
-      playerDirection = PlayerDirection.east;
+      playerDirection = .east;
     } else if (dx < 0) {
-      playerDirection = PlayerDirection.west;
+      playerDirection = .west;
     } else if (dy > 0) {
-      playerDirection = PlayerDirection.south;
+      playerDirection = .south;
     } else if (dy < 0) {
-      playerDirection = PlayerDirection.north;
+      playerDirection = .north;
     }
 
     final nextPosition = playerPosition.copyWith(
@@ -68,7 +68,7 @@ class ArcadeWorld {
     if (!grid.isWalkable(nextPosition)) return false;
 
     playerPosition = nextPosition;
-    
+
     return true;
   }
 }

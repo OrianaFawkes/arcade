@@ -1,12 +1,11 @@
-import 'package:arcade/features/arcade/world/grid_position.dart';
-
+import 'package:arcade/features/arcade/domain/grid_position.dart';
 
 class ArcadeStation {
   final String id;
   final String label;
 
   final GridPosition position;
-  
+
   final String routeName;
 
   const ArcadeStation({
@@ -20,10 +19,7 @@ class ArcadeStation {
     return ArcadeStation(
       id: json['id'] as String,
       label: json['label'] as String,
-      position: GridPosition(
-        json['x'] as int,
-        json['y'] as int,
-      ),
+      position: GridPosition(json['x'] as int, json['y'] as int),
       routeName: json['routeName'] as String,
     );
   }

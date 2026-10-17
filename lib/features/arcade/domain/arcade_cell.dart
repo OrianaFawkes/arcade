@@ -1,4 +1,4 @@
-import 'package:arcade/features/arcade/world/terrain_type.dart';
+import 'package:arcade/features/arcade/domain/terrain_type.dart';
 
 class ArcadeCell {
   TerrainType terrain;

@@ -1,4 +1,4 @@
-import 'package:arcade/features/arcade/world/grid_position.dart';
+import 'package:arcade/features/arcade/domain/grid_position.dart';
 import 'package:flutter/material.dart';
 
 class TopDownProjection {

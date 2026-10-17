@@ -1,5 +1,5 @@
-import 'package:arcade/features/arcade/world/arcade_grid.dart';
-import 'package:arcade/features/arcade/world/grid_position.dart';
+import 'package:arcade/features/arcade/domain/arcade_grid.dart';
+import 'package:arcade/features/arcade/domain/grid_position.dart';
 
 class PathFinder {
   const PathFinder();

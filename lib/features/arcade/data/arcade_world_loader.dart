@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:arcade/features/arcade/world/arcade_world_layout.dart';
+import 'package:arcade/features/arcade/domain/arcade_world_layout.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class ArcadeWorldLoader {
