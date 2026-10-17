@@ -1,40 +1,40 @@
 import 'dart:math' as math;
 
+import 'package:arcade/features/arcade/config/arcade_visual_config.dart';
 import 'package:arcade/features/arcade/domain/player_direction.dart';
 import 'package:flutter/material.dart';
 
-class ArcadePlayerPainter extends StatefulWidget {
+class ArcadePlayer extends StatefulWidget {
   final PlayerDirection direction;
 
   final Offset groundPosition;
 
   final bool isMoving;
 
-  const ArcadePlayerPainter({
+  final ArcadeVisualConfig visualConfig;
+
+  const ArcadePlayer({
     super.key,
     required this.direction,
     required this.groundPosition,
     required this.isMoving,
+    required this.visualConfig,
   });
 
   @override
-  State<ArcadePlayerPainter> createState() => _ArcadePlayerPainterState();
+  State<ArcadePlayer> createState() => _ArcadePlayerState();
 }
 
-class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
+class _ArcadePlayerState extends State<ArcadePlayer>
     with SingleTickerProviderStateMixin {
-  static const _idleRight =
-      'assets/sprites/player/ori_2026-right-standing-24x33.png';
-  static const _idleLeft =
-      'assets/sprites/player/ori_2026-left-standing-24x33.png';
-  static const _walkRightA =
-      'assets/sprites/player/ori_2026-right-both-up-30x33.png';
+  static const _idleRight = 'assets/sprites/player/ori_2026-right-standing.png';
+  static const _idleLeft = 'assets/sprites/player/ori_2026-left-standing.png';
+  static const _walkRightA = 'assets/sprites/player/ori_2026-right-both-up.png';
   static const _walkRightB =
-      'assets/sprites/player/ori_2026-right-both-legs-up-30x31.png';
-  static const _walkLeftA =
-      'assets/sprites/player/ori_2026-left-both-up-30x33.png';
+      'assets/sprites/player/ori_2026-right-both-legs-up.png';
+  static const _walkLeftA = 'assets/sprites/player/ori_2026-left-both-up.png';
   static const _walkLeftB =
-      'assets/sprites/player/ori_2026-left-both-legs-up-30x31.png';
+      'assets/sprites/player/ori_2026-left-both-legs-up.png';
 
   late final AnimationController _animationController;
 
@@ -53,7 +53,7 @@ class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
   }
 
   @override
-  void didUpdateWidget(covariant ArcadePlayerPainter oldWidget) {
+  void didUpdateWidget(covariant ArcadePlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.isMoving && !oldWidget.isMoving) {
@@ -88,20 +88,23 @@ class _ArcadePlayerPainterState extends State<ArcadePlayerPainter>
   double get _bounce {
     if (!widget.isMoving) return 0;
 
-    return -math.sin(_animationController.value * 2 * math.pi) * 1.5;
+    return -math.sin(_animationController.value * 2 * math.pi) *
+        widget.visualConfig.playerBounceHeight;
   }
 
   @override
   Widget build(_) {
-    const spriteWidth = 40.0;
-    const spriteHeight = 40.0;
+    final spriteWidth = widget.visualConfig.playerWidth;
+    final spriteHeight = widget.visualConfig.playerHeight;
 
-    const shadowWidth = 24.0;
-    const shadowHeight = 4.0;
+    final shadowWidth = widget.visualConfig.playerShadowWidth;
+    final shadowHeight = widget.visualConfig.playerShadowHeight;
+
+    final heightOffset = widget.visualConfig.tileHeight / 3;
 
     return Positioned(
       left: widget.groundPosition.dx - spriteWidth / 2,
-      top: widget.groundPosition.dy - spriteHeight,
+      top: widget.groundPosition.dy - spriteHeight + heightOffset,
       width: spriteWidth,
       height: spriteHeight,
       child: AnimatedBuilder(

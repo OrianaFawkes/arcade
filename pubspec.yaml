@@ -32,5 +32,7 @@ flutter:
         - asset: assets/fonts/DepartureMono/DepartureMono-Regular.otf
 
   assets:
+    - assets/sprites/cabinet/
     - assets/sprites/player/
+    - assets/sprites/wall/
     - assets/worlds/

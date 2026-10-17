@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:arcade/features/arcade/config/arcade_visual_config.dart';
 import 'package:arcade/features/arcade/presentation/camera/arcade_camera.dart';
-import 'package:arcade/features/arcade/presentation/rendering/arcade_player_painter.dart';
+import 'package:arcade/features/arcade/presentation/rendering/arcade_player.dart';
 import 'package:arcade/features/arcade/domain/arcade_station.dart';
-import 'package:arcade/features/arcade/presentation/rendering/arcade_station_placeholder.dart';
-import 'package:arcade/features/arcade/presentation/rendering/arcade_wall_placeholder.dart';
+import 'package:arcade/features/arcade/presentation/rendering/arcade_cabinet.dart';
+import 'package:arcade/features/arcade/presentation/rendering/arcade_wall.dart';
 import 'package:arcade/features/arcade/domain/arcade_world.dart';
 import 'package:arcade/features/arcade/data/arcade_world_loader.dart';
 import 'package:arcade/features/arcade/presentation/rendering/arcade_world_painter.dart';
@@ -24,56 +25,62 @@ class ArcadeScreen extends StatefulWidget {
 
 class _ArcadeScreenState extends State<ArcadeScreen>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _cameraController;
+  late final ArcadeVisualConfig visualConfig;
 
-  late final ArcadeWorldLoader worldLoader;
+  late final AnimationController _cameraController;
 
   late final ArcadeCamera _camera;
 
-  late TopDownProjection projection;
+  late final ArcadeWorldLoader _worldLoader;
+
+  late final PathFinder _pathFinder;
+
+  late TopDownProjection _projection;
 
   final Set<LogicalKeyboardKey> _heldKeys = {};
 
-  final pathFinder = PathFinder();
-
   List<GridPosition> _path = [];
+
+  ArcadeWorld? _world;
 
   Timer? _movementRepeatStartTimer;
   Timer? _movementRepeatTimer;
   Timer? _pathMovementTimer;
 
-  ArcadeWorld? world;
-
   @override
   void initState() {
     super.initState();
 
-    worldLoader = ArcadeWorldLoader();
-
-    _camera = ArcadeCamera();
-
-    _loadWorld();
+    visualConfig = ArcadeVisualConfig(pixelScale: 2);
 
     _cameraController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 1),
     )..addListener(_updateCamera);
     _cameraController.repeat();
+
+    _camera = ArcadeCamera();
+
+    _worldLoader = ArcadeWorldLoader();
+
+    _pathFinder = PathFinder();
+
+    _loadWorld();
   }
 
   @override
   void dispose() {
+    _cameraController.dispose();
+
     _movementRepeatStartTimer?.cancel();
     _movementRepeatTimer?.cancel();
     _pathMovementTimer?.cancel();
-
-    _cameraController.dispose();
 
     super.dispose();
   }
 
   void _updateCamera() {
-    if (!mounted || world == null) return;
+    if (!mounted || _world == null) return;
 
     _camera.update();
 
@@ -81,19 +88,22 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   }
 
   Future<void> _loadWorld() async {
-    final layout = await worldLoader.load('assets/worlds/arcade_world.json');
+    final layout = await _worldLoader.load('assets/worlds/arcade_world.json');
 
     final loadedWorld = ArcadeWorld(layout: layout);
 
-    final loadedProjection = TopDownProjection(tileWidth: 40, tileHeight: 20);
+    final loadedProjection = TopDownProjection(
+      tileWidth: visualConfig.tileWidth,
+      tileHeight: visualConfig.tileHeight,
+    );
 
     _camera.snapTo(loadedWorld.playerPosition, projection: loadedProjection);
 
     if (!mounted) return;
 
     setState(() {
-      world = loadedWorld;
-      projection = loadedProjection;
+      _world = loadedWorld;
+      _projection = loadedProjection;
     });
   }
 
@@ -102,11 +112,11 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     final cameraOffset = center - _camera.position;
     final worldScreenPosition = screenPosition - cameraOffset;
 
-    return projection.screenToGrid(worldScreenPosition);
+    return _projection.screenToGrid(worldScreenPosition);
   }
 
   void _handleTap(Offset position, Size size) {
-    final currentWorld = world;
+    final currentWorld = _world;
 
     if (currentWorld == null) return;
 
@@ -114,7 +124,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     if (!currentWorld.grid.isWalkable(target)) return;
 
-    final path = pathFinder.findPath(
+    final path = _pathFinder.findPath(
       grid: currentWorld.grid,
       start: currentWorld.playerPosition,
       goal: target,
@@ -128,7 +138,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   }
 
   void _updatePathMovement() {
-    final currentWorld = world;
+    final currentWorld = _world;
 
     if (currentWorld == null || _path.isEmpty) {
       _pathMovementTimer?.cancel();
@@ -144,10 +154,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     setState(() {
       if (currentWorld.movePlayer(dx, dy)) {
-        // follow
-        _camera.snapTo(currentWorld.playerPosition, projection: projection);
-
-        _camera.update();
+        _camera.follow(currentWorld.playerPosition, projection: _projection);
       } else {
         _path.clear();
       }
@@ -263,7 +270,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   }
 
   void _moveFromHeldKeys() {
-    final currentWorld = world;
+    final currentWorld = _world;
 
     if (currentWorld == null) return;
 
@@ -288,16 +295,15 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     setState(() {
       if (currentWorld.movePlayer(dx, dy)) {
-        _camera.snapTo(currentWorld.playerPosition, projection: projection);
-        _camera.update();
+        _camera.follow(currentWorld.playerPosition, projection: _projection);
       }
     });
   }
 
   GridPosition _positionInFrontOfPlayer() {
-    final position = world!.playerPosition;
+    final position = _world!.playerPosition;
 
-    return switch (world!.playerDirection) {
+    return switch (_world!.playerDirection) {
       .north => position.copyWith(y: position.y - 1),
       .east => position.copyWith(x: position.x + 1),
       .south => position.copyWith(y: position.y + 1),
@@ -306,7 +312,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   }
 
   void _tryInteract() {
-    final currentWorld = world;
+    final currentWorld = _world;
 
     if (currentWorld == null) return;
 
@@ -332,7 +338,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   }
 
   ArcadeStation? _stationInFrontOfPlayer() {
-    final currentWorld = world;
+    final currentWorld = _world;
 
     if (currentWorld == null) return null;
 
@@ -347,7 +353,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
   @override
   Widget build(_) {
-    final currentWorld = world;
+    final currentWorld = _world;
 
     if (currentWorld == null) {
       return Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -374,9 +380,10 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
             final center = Offset(size.width / 2, size.height / 2);
             final cameraOffset = center - _camera.position;
+
             final playerScreenPosition =
                 cameraOffset +
-                projection.worldToScreen(currentWorld.playerPosition);
+                _projection.worldToScreen(currentWorld.playerPosition);
 
             final depthObjects = <({double depth, Widget widget})>[];
 
@@ -388,18 +395,18 @@ class _ArcadeScreenState extends State<ArcadeScreen>
                 if (cell.terrain != .wall) continue;
 
                 final tileCenter =
-                    cameraOffset + projection.worldToScreen(position);
+                    cameraOffset + _projection.worldToScreen(position);
 
                 final groundPosition =
-                    tileCenter + Offset(0, projection.tileHeight / 2);
+                    tileCenter + Offset(0, _projection.tileHeight / 2);
 
                 depthObjects.add((
                   depth: groundPosition.dy,
-                  widget: ArcadeWallPlaceholder(
+                  widget: ArcadeWall(
                     key: ValueKey('wall-$x-$y'),
+                    spriteAsset: 'assets/sprites/wall/arcade-wall.png',
                     groundPosition: groundPosition,
-                    tileWidth: projection.tileWidth,
-                    visualHeight: 20,
+                    visualConfig: visualConfig,
                   ),
                 ));
               }
@@ -407,28 +414,29 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
             for (final station in currentWorld.stations) {
               final groundPosition =
-                  cameraOffset + projection.worldToScreen(station.position);
+                  cameraOffset + _projection.worldToScreen(station.position);
 
               depthObjects.add((
                 depth: groundPosition.dy,
-                widget: ArcadeStationPlaceholder(
+                widget: ArcadeCabinet(
                   key: ValueKey('station-${station.id}'),
-                  groundPosition: groundPosition,
-                  tileWidth: projection.tileWidth,
-                  visualHeight: 50,
                   label: station.label,
+                  spriteAsset: 'assets/sprites/cabinet/arcade_cabinet.png',
+                  groundPosition: groundPosition,
                   canInteract: _stationInFrontOfPlayer()?.id == station.id,
+                  visualConfig: visualConfig,
                 ),
               ));
             }
 
             depthObjects.add((
               depth: playerScreenPosition.dy,
-              widget: ArcadePlayerPainter(
+              widget: ArcadePlayer(
                 key: ValueKey('arcade-player'),
                 direction: currentWorld.playerDirection,
                 groundPosition: playerScreenPosition,
                 isMoving: _heldKeys.any(_isMovementKey) || _path.isNotEmpty,
+                visualConfig: visualConfig,
               ),
             ));
 
@@ -444,7 +452,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
                     painter: ArcadeWorldPainter(
                       world: currentWorld,
                       camera: _camera,
-                      projection: projection,
+                      projection: _projection,
                     ),
                     size: size,
                   ),
