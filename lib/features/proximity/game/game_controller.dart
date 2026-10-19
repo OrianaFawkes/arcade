@@ -2,30 +2,30 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:arcade/features/minesweeper/game/game_storage.dart';
-import 'package:arcade/features/minesweeper/models/cell.dart';
-import 'package:arcade/features/minesweeper/models/difficulty.dart';
-import 'package:arcade/features/minesweeper/models/game_state.dart';
-import 'package:arcade/features/minesweeper/models/position.dart';
+import 'package:arcade/features/proximity/game/game_storage.dart';
+import 'package:arcade/features/proximity/models/cell.dart';
+import 'package:arcade/features/proximity/models/difficulty.dart';
+import 'package:arcade/features/proximity/models/game_state.dart';
+import 'package:arcade/features/proximity/models/position.dart';
 
-class MinesweeperGameController {
-  final MinesweeperGameStorage storage;
+class GameController {
+  final GameStorage storage;
 
-  MinesweeperGameController(this.storage);
+  GameController(this.storage);
 
   final Random random = Random();
 
   List<List<Cell>> _board = [];
 
-  Difficulty _difficulty = Difficulty.beginner;
-  MinesweeperGameStatus _status = MinesweeperGameStatus.ready;
+  Difficulty _difficulty = .beginner;
+  GameStatus _status = .ready;
 
-  Duration _elapsed = Duration.zero;
+  Duration _elapsed = .zero;
   final Stopwatch _stopwatch = Stopwatch();
 
   Duration? _bestTime;
 
-  MinesweeperGameStatus get status => _status;
+  GameStatus get status => _status;
   Difficulty get difficulty => _difficulty;
 
   List<List<Cell>> get board =>
@@ -40,13 +40,12 @@ class MinesweeperGameController {
   }
 
   bool get isGameOver {
-    return _status == MinesweeperGameStatus.won ||
-        _status == MinesweeperGameStatus.lost;
+    return _status == .won || _status == .lost;
   }
 
-  bool get isPlaying => _status == MinesweeperGameStatus.playing;
+  bool get isPlaying => _status == .playing;
 
-  bool get isReady => _status == MinesweeperGameStatus.ready;
+  bool get isReady => _status == .ready;
 
   Future<void> initialize() async {
     try {
@@ -61,7 +60,7 @@ class MinesweeperGameController {
 
       _bestTime = storage.loadBestTime(_difficulty);
 
-      if (_status == MinesweeperGameStatus.playing) {
+      if (_status == .playing) {
         _startStopwatch();
       }
     } catch (_) {
@@ -73,8 +72,8 @@ class MinesweeperGameController {
     _stopStopwatch();
 
     _difficulty = difficulty;
-    _status = MinesweeperGameStatus.ready;
-    _elapsed = Duration.zero;
+    _status = .ready;
+    _elapsed = .zero;
     _board = _createEmptyBoard();
 
     _bestTime = storage.loadBestTime(difficulty);
@@ -268,7 +267,7 @@ class MinesweeperGameController {
       }
     }
 
-    _status = MinesweeperGameStatus.won;
+    _status = .won;
   }
 
   Iterable<Position> _neighbors(int row, int column) sync* {
@@ -318,8 +317,8 @@ class MinesweeperGameController {
     return storage.saveGame(currentGame: _createSnapshot());
   }
 
-  MinesweeperGameState _createSnapshot() {
-    return MinesweeperGameState(
+  GameState _createSnapshot() {
+    return GameState(
       board: _board.map((row) => row.toList()).toList(),
       difficulty: _difficulty,
       status: _status,
@@ -327,7 +326,7 @@ class MinesweeperGameController {
     );
   }
 
-  void _restoreGame(MinesweeperGameState state) {
+  void _restoreGame(GameState state) {
     _stopStopwatch();
 
     _difficulty = state.difficulty;

@@ -1,9 +1,9 @@
 import 'dart:math';
 
-import 'package:arcade/features/2048/game/game_storage.dart';
-import 'package:arcade/features/2048/models/game_state.dart';
-import 'package:arcade/features/2048/models/move_direction.dart';
-import 'package:arcade/features/2048/models/tile.dart';
+import 'package:arcade/features/powers_of_two/game/game_storage.dart';
+import 'package:arcade/features/powers_of_two/models/game_state.dart';
+import 'package:arcade/features/powers_of_two/models/move_direction.dart';
+import 'package:arcade/features/powers_of_two/models/tile.dart';
 import 'package:flutter/material.dart';
 
 class GameController {

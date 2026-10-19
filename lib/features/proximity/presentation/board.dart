@@ -1,9 +1,8 @@
+import 'package:arcade/features/proximity/models/cell.dart';
+import 'package:arcade/features/proximity/models/difficulty.dart';
+import 'package:arcade/features/proximity/presentation/cell_widget.dart';
 import 'package:arcade/shared/presentation/widgets/pixel_card.dart';
 import 'package:flutter/material.dart';
-
-import '../models/cell.dart';
-import '../models/difficulty.dart';
-import 'cell_widget.dart';
 
 class Board extends StatelessWidget {
   static const double boardSize = 320;

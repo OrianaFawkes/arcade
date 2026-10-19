@@ -1,7 +1,7 @@
 import 'package:arcade/app/screens/not_found_screen.dart';
-import 'package:arcade/features/2048/presentation/a_2048_screen.dart';
+import 'package:arcade/features/powers_of_two/presentation/powers_of_two_screen.dart';
 import 'package:arcade/features/arcade/presentation/arcade_screen.dart';
-import 'package:arcade/features/minesweeper/presentation/minesweeper_screen.dart';
+import 'package:arcade/features/proximity/presentation/proximity_screen.dart';
 import 'package:go_router/go_router.dart';
 
 GoRouter createRouter() {
@@ -12,12 +12,12 @@ GoRouter createRouter() {
         pageBuilder: (_, _) => NoTransitionPage(child: ArcadeScreen()),
       ),
       GoRoute(
-        path: '/2048',
-        pageBuilder: (_, _) => NoTransitionPage(child: A2048Screen()),
+        path: '/powers-of-two',
+        pageBuilder: (_, _) => NoTransitionPage(child: PowersOfTwoScreen()),
       ),
       GoRoute(
-        path: '/minesweeper',
-        pageBuilder: (_, _) => NoTransitionPage(child: MinesweeperScreen()),
+        path: '/proximity',
+        pageBuilder: (_, _) => NoTransitionPage(child: ProximityScreen()),
       ),
     ],
     errorBuilder: (_, _) => NotFoundScreen(),

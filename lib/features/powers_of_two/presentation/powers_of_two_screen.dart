@@ -1,24 +1,23 @@
-import 'package:arcade/features/2048/game/game_storage.dart';
-import 'package:arcade/features/2048/presentation/settings_dialog.dart';
-import 'package:arcade/features/2048/presentation/tile_color_scheme.dart';
+import 'package:arcade/features/powers_of_two/presentation/board.dart';
+import 'package:arcade/features/powers_of_two/game/game_storage.dart';
+import 'package:arcade/features/powers_of_two/presentation/settings_dialog.dart';
+import 'package:arcade/features/powers_of_two/presentation/tile_color_scheme.dart';
 import 'package:arcade/shared/presentation/dialogs/app_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:arcade/features/2048/game/game_controller.dart';
-import 'package:arcade/features/2048/models/move_direction.dart';
+import 'package:arcade/features/powers_of_two/game/game_controller.dart';
+import 'package:arcade/features/powers_of_two/models/move_direction.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'board.dart';
-
-class A2048Screen extends StatefulWidget {
-  const A2048Screen({super.key});
+class PowersOfTwoScreen extends StatefulWidget {
+  const PowersOfTwoScreen({super.key});
 
   @override
-  State<A2048Screen> createState() => _A2048ScreenState();
+  State<PowersOfTwoScreen> createState() => _PowersOfTwoScreenState();
 }
 
-class _A2048ScreenState extends State<A2048Screen> {
+class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
   final FocusNode _focusNode = FocusNode();
 
   GameController? game;
@@ -211,7 +210,7 @@ class _A2048ScreenState extends State<A2048Screen> {
               icon: Icon(Icons.arrow_back),
               onPressed: () => context.go('/'),
             ),
-            title: Text('2048'),
+            title: Text('Powers of Two'),
             actions: [
               Padding(
                 padding: .symmetric(horizontal: 8.0),

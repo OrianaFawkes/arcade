@@ -1,6 +1,6 @@
-import 'package:arcade/features/2048/presentation/tile_color_scheme.dart';
+import 'package:arcade/features/powers_of_two/presentation/tile_color_scheme.dart';
 import 'package:flutter/material.dart';
-import 'package:arcade/features/2048/models/tile.dart';
+import 'package:arcade/features/powers_of_two/models/tile.dart';
 import 'package:arcade/shared/presentation/widgets/pixel_card.dart';
 
 class TileWidget extends StatefulWidget {

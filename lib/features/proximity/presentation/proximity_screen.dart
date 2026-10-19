@@ -1,26 +1,24 @@
 import 'dart:async';
 
+import 'package:arcade/features/proximity/presentation/board.dart';
+import 'package:arcade/features/proximity/game/game_storage.dart';
+import 'package:arcade/features/proximity/game/game_controller.dart';
+import 'package:arcade/features/proximity/models/difficulty.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../game/game_controller.dart';
-import '../game/game_storage.dart';
-import '../models/difficulty.dart';
-import '../models/game_state.dart';
-import 'board.dart';
-
-class MinesweeperScreen extends StatefulWidget {
-  const MinesweeperScreen({super.key});
+class ProximityScreen extends StatefulWidget {
+  const ProximityScreen({super.key});
 
   @override
-  State<MinesweeperScreen> createState() => _MinesweeperScreenState();
+  State<ProximityScreen> createState() => _ProximityScreenState();
 }
 
-class _MinesweeperScreenState extends State<MinesweeperScreen> {
-  static const Difficulty difficulty = Difficulty.beginner;
+class _ProximityScreenState extends State<ProximityScreen> {
+  static const Difficulty difficulty = .beginner;
 
-  MinesweeperGameController? game;
+  GameController? game;
 
   Timer? _timer;
 
@@ -31,9 +29,9 @@ class _MinesweeperScreenState extends State<MinesweeperScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final preferences = await SharedPreferences.getInstance();
 
-      final storage = MinesweeperGameStorage(preferences);
+      final storage = GameStorage(preferences);
 
-      final localGame = MinesweeperGameController(storage);
+      final localGame = GameController(storage);
 
       await localGame.initialize();
 
@@ -68,27 +66,7 @@ class _MinesweeperScreenState extends State<MinesweeperScreen> {
     final localGame = game;
     if (localGame == null) return;
 
-    final before = localGame.cellAt(row, column);
-
-    debugPrint(
-      'BEFORE [$row,$column] '
-      'status=${localGame.status} '
-      'revealed=${before?.isRevealed} '
-      'flagged=${before?.isFlagged} '
-      'mine=${before?.hasMine}',
-    );
-
     await localGame.reveal(row, column);
-
-    final after = localGame.cellAt(row, column);
-
-    debugPrint(
-      'AFTER [$row,$column] '
-      'status=${localGame.status} '
-      'revealed=${after?.isRevealed} '
-      'flagged=${after?.isFlagged} '
-      'mine=${after?.hasMine}',
-    );
 
     if (!mounted) return;
 
@@ -130,10 +108,10 @@ class _MinesweeperScreenState extends State<MinesweeperScreen> {
     if (localGame == null) return '';
 
     return switch (localGame.status) {
-      MinesweeperGameStatus.ready => 'Ready',
-      MinesweeperGameStatus.playing => 'Playing',
-      MinesweeperGameStatus.won => 'You Win!',
-      MinesweeperGameStatus.lost => 'Game Over',
+      .ready => 'Ready',
+      .playing => 'Playing',
+      .won => 'You Win!',
+      .lost => 'Game Over',
     };
   }
 
@@ -151,7 +129,7 @@ class _MinesweeperScreenState extends State<MinesweeperScreen> {
           icon: Icon(Icons.arrow_back),
           onPressed: () => context.go('/'),
         ),
-        title: Text('Minesweeper'),
+        title: Text('Proximity'),
         actions: [
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),

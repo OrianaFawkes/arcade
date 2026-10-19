@@ -1,31 +1,31 @@
 import 'dart:convert';
 
-import 'package:arcade/features/minesweeper/models/difficulty.dart';
-import 'package:arcade/features/minesweeper/models/game_state.dart';
+import 'package:arcade/features/proximity/models/difficulty.dart';
+import 'package:arcade/features/proximity/models/game_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class MinesweeperGameStorage {
-  static const _currentGameKey = 'minesweeper_current_game';
+class GameStorage {
+  static const _currentGameKey = 'proximity_current_game';
 
   final SharedPreferences preferences;
 
-  MinesweeperGameStorage(this.preferences);
+  GameStorage(this.preferences);
 
-  Future<void> saveGame({required MinesweeperGameState currentGame}) async {
+  Future<void> saveGame({required GameState currentGame}) async {
     await preferences.setString(
       _currentGameKey,
       jsonEncode(currentGame.toJson()),
     );
   }
 
-  MinesweeperGameState? loadGame() {
+  GameState? loadGame() {
     final value = preferences.getString(_currentGameKey);
 
     if (value == null) return null;
 
     final json = jsonDecode(value) as Map<String, dynamic>;
 
-    return MinesweeperGameState.fromJson(json);
+    return GameState.fromJson(json);
   }
 
   Future<void> saveBestTime({
@@ -44,6 +44,6 @@ class MinesweeperGameStorage {
   }
 
   String _bestTimeKey(Difficulty difficulty) {
-    return 'minesweeper_best_time_${difficulty.name}';
+    return 'proximity_best_time_${difficulty.name}';
   }
 }

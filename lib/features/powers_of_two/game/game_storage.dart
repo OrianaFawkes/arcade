@@ -1,17 +1,17 @@
 import 'dart:convert';
 import 'dart:ui';
 
-import 'package:arcade/features/2048/models/game_state.dart';
-import 'package:arcade/features/2048/presentation/tile_color_scheme.dart';
+import 'package:arcade/features/powers_of_two/models/game_state.dart';
+import 'package:arcade/features/powers_of_two/presentation/tile_color_scheme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GameStorage {
-  static const _currentGameKey = '2048_current_game';
-  static const _historyKey = '2048_history';
-  static const _highScoreKey = '2048_high_score';
-  static const _hasShownWinKey = '2048_has_shown_win';
-  static const _tileColorKey = '2048_tile_color';
-  static const _hasBoardJiggleKey = '2048_has_board_jiggle';
+  static const _currentGameKey = 'powers_of_two_current_game';
+  static const _historyKey = 'powers_of_two_history';
+  static const _highScoreKey = 'powers_of_two_high_score';
+  static const _hasShownWinKey = 'powers_of_two_has_shown_win';
+  static const _tileColorKey = 'powers_of_two_tile_color';
+  static const _hasBoardJiggleKey = 'powers_of_two_has_board_jiggle';
 
   final SharedPreferences preferences;
 
@@ -86,6 +86,6 @@ class GameStorage {
   }
 
   bool loadHasBoardJiggle() {
-    return preferences.getBool(_hasBoardJiggleKey) ?? true;
+    return preferences.getBool(_hasBoardJiggleKey) ?? false;
   }
 }

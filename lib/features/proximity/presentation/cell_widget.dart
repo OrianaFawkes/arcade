@@ -1,7 +1,6 @@
+import 'package:arcade/features/proximity/models/cell.dart';
 import 'package:arcade/shared/presentation/widgets/pixel_card.dart';
 import 'package:flutter/material.dart';
-
-import '../models/cell.dart';
 
 class CellWidget extends StatelessWidget {
   final Cell cell;

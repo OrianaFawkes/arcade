@@ -1,6 +1,8 @@
 class Cell {
   final bool hasMine;
+
   final int adjacentMines;
+
   final bool isRevealed;
   final bool isFlagged;
 

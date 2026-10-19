@@ -1,4 +1,4 @@
-import 'package:arcade/features/2048/models/tile.dart';
+import 'package:arcade/features/powers_of_two/models/tile.dart';
 
 class GameState {
   final List<Tile> tiles;

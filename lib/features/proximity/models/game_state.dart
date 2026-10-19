@@ -1,15 +1,18 @@
-import 'package:arcade/features/minesweeper/models/cell.dart';
-import 'package:arcade/features/minesweeper/models/difficulty.dart';
+import 'package:arcade/features/proximity/models/cell.dart';
+import 'package:arcade/features/proximity/models/difficulty.dart';
 
-enum MinesweeperGameStatus { ready, playing, won, lost }
+enum GameStatus { ready, playing, won, lost }
 
-class MinesweeperGameState {
+class GameState {
   final List<List<Cell>> board;
+
   final Difficulty difficulty;
-  final MinesweeperGameStatus status;
+
+  final GameStatus status;
+
   final Duration elapsed;
 
-  const MinesweeperGameState({
+  const GameState({
     required this.board,
     required this.difficulty,
     required this.status,
@@ -27,8 +30,8 @@ class MinesweeperGameState {
     };
   }
 
-  factory MinesweeperGameState.fromJson(Map<String, dynamic> json) {
-    return MinesweeperGameState(
+  factory GameState.fromJson(Map<String, dynamic> json) {
+    return GameState(
       board: (json['board'] as List<dynamic>)
           .map(
             (row) => (row as List<dynamic>)
@@ -37,7 +40,7 @@ class MinesweeperGameState {
           )
           .toList(),
       difficulty: Difficulty.values.byName(json['difficulty'] as String),
-      status: MinesweeperGameStatus.values.byName(json['status'] as String),
+      status: GameStatus.values.byName(json['status'] as String),
       elapsed: Duration(milliseconds: json['elapsedMilliseconds'] as int),
     );
   }
