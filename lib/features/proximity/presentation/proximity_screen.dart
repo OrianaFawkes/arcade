@@ -16,8 +16,6 @@ class ProximityScreen extends StatefulWidget {
 }
 
 class _ProximityScreenState extends State<ProximityScreen> {
-  static const Difficulty difficulty = .beginner;
-
   GameController? game;
 
   Timer? _timer;
@@ -88,7 +86,7 @@ class _ProximityScreenState extends State<ProximityScreen> {
     final localGame = game;
     if (localGame == null) return;
 
-    await localGame.startGame(difficulty);
+    await localGame.startGame(localGame.difficulty);
 
     if (!mounted) return;
 
@@ -115,6 +113,54 @@ class _ProximityScreenState extends State<ProximityScreen> {
     };
   }
 
+  String _difficultyLabel(Difficulty difficulty) {
+    return switch (difficulty) {
+      .beginner => 'Beginner',
+      .intermediate => 'Intermediate',
+      .expert => 'Expert',
+    };
+  }
+
+  Future<void> _selectDifficulty() async {
+    final localGame = game;
+    if (localGame == null) return;
+
+    final selectedDifficulty = await showDialog<Difficulty>(
+      context: context,
+      builder: (dialogContext) {
+        return SimpleDialog(
+          title: Text('Difficulty'),
+          children: [
+            for (final difficulty in Difficulty.values)
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(dialogContext, difficulty);
+                },
+                child: Row(
+                  children: [
+                    Expanded(child: Text(_difficultyLabel(difficulty))),
+                    if (difficulty == localGame.difficulty)
+                      const Icon(Icons.check_rounded),
+                  ],
+                ),
+              ),
+          ],
+        );
+      },
+    );
+
+    if (selectedDifficulty == null ||
+        selectedDifficulty == localGame.difficulty) {
+      return;
+    }
+
+    await localGame.startGame(selectedDifficulty);
+
+    if (!mounted) return;
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final localGame = game;
@@ -139,7 +185,9 @@ class _ProximityScreenState extends State<ProximityScreen> {
                 spacing: 4.0,
                 children: [
                   Icon(Icons.flag_rounded, size: 16),
-                  Text('${difficulty.mineCount - localGame.flagsUsed}'),
+                  Text(
+                    '${localGame.difficulty.mineCount - localGame.flagsUsed}',
+                  ),
                 ],
               ),
             ),
@@ -147,6 +195,11 @@ class _ProximityScreenState extends State<ProximityScreen> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: Center(child: Text(_formatDuration(localGame.elapsed))),
+          ),
+          IconButton(
+            onPressed: _selectDifficulty,
+            icon: Icon(Icons.tune_rounded),
+            tooltip: 'Change difficulty',
           ),
           IconButton(
             onPressed: _restart,
@@ -161,9 +214,13 @@ class _ProximityScreenState extends State<ProximityScreen> {
           spacing: 16.0,
           children: [
             Text(_statusText(), style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              _difficultyLabel(localGame.difficulty),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             Board(
               board: localGame.board,
-              difficulty: difficulty,
+              difficulty: localGame.difficulty,
               onReveal: _reveal,
               onToggleFlag: _toggleFlag,
             ),

@@ -22,37 +22,51 @@ class Board extends StatelessWidget {
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
     final columns = difficulty.columns;
 
-    return SizedBox(
-      width: boardSize,
-      height: boardSize,
-      child: PixelCard(
-        borderColor: Color(0xFF2D1B1B),
-        fillColor: Color(0xFF614E4E),
-        padding: .all(4),
-        radius: 6,
-        child: GridView.builder(
-          physics: NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            // crossAxisSpacing: gap,
-            // mainAxisSpacing: gap,
-          ),
-          itemCount: difficulty.rows * columns,
-          itemBuilder: (context, index) {
-            final row = index ~/ columns;
-            final column = index % columns;
+    const cellSize = 32.0;
+    const boardPadding = 4.0;
+    const boardBorderAllowance = 4.0;
 
-            return CellWidget(
-              cell: board[row][column],
-              onTap: () => onReveal(row, column),
-              onLongPress: () => onToggleFlag(row, column),
-              onSecondaryTap: () => onToggleFlag(row, column),
-            );
-          },
+    final boardWidth =
+        columns * cellSize + boardPadding * 2 + boardBorderAllowance;
+    final boardHeight =
+        difficulty.rows * cellSize + boardPadding * 2 + boardBorderAllowance;
+
+    return SingleChildScrollView(
+      scrollDirection: .horizontal,
+      child: SingleChildScrollView(
+        scrollDirection: .vertical,
+        child: SizedBox(
+          width: boardWidth,
+          height: boardHeight,
+          child: PixelCard(
+            borderColor: Color(0xFF2D1B1B),
+            fillColor: Color(0xFF614E4E),
+            padding: .all(boardPadding),
+            radius: 6,
+            child: GridView.builder(
+              physics: NeverScrollableScrollPhysics(),
+              padding: .zero,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+              ),
+              itemCount: difficulty.rows * columns,
+              itemBuilder: (context, index) {
+                final row = index ~/ columns;
+                final column = index % columns;
+
+                return CellWidget(
+                  cell: board[row][column],
+                  onTap: () => onReveal(row, column),
+                  onLongPress: () => onToggleFlag(row, column),
+                  onSecondaryTap: () => onToggleFlag(row, column),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
