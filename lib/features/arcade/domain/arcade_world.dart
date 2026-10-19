@@ -71,4 +71,21 @@ class ArcadeWorld {
 
     return true;
   }
+
+  bool facePosition(GridPosition target) {
+    final dx = target.x - playerPosition.x;
+    final dy = target.y - playerPosition.y;
+
+    if (dx.abs() + dy.abs() != 1) return false;
+
+    playerDirection = switch ((dx, dy)) {
+      (0, -1) => .north,
+      (1, 0) => .east,
+      (0, 1) => .south,
+      (-1, 0) => .west,
+      _ => playerDirection,
+    };
+
+    return true;
+  }
 }

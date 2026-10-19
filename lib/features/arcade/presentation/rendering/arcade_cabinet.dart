@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 class ArcadeCabinet extends StatelessWidget {
   final String label;
-
   final String spriteAsset;
 
   final Offset groundPosition;

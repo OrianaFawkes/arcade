@@ -19,18 +19,18 @@
   ],
   "stations": [
     {
-      "id": "minesweeper",
-      "label": "MINES",
+      "id": "proximity",
+      "label": "Proximity",
       "x": 9,
       "y": 3,
-      "routeName": "/minesweeper"
+      "routeName": "/proximity"
     },
     {
-      "id": "2048",
-      "label": "2048",
+      "id": "powers-of-two",
+      "label": "Powers of Two",
       "x": 10,
       "y": 3,
-      "routeName": "/2048"
+      "routeName": "/powers-of-two"
     }
   ]
 }

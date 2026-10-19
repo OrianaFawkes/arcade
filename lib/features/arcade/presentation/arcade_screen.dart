@@ -47,6 +47,8 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   Timer? _movementRepeatTimer;
   Timer? _pathMovementTimer;
 
+  String? _pendingStationId;
+
   @override
   void initState() {
     super.initState();
@@ -115,10 +117,132 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     return _projection.screenToGrid(worldScreenPosition);
   }
 
-  void _handleTap(Offset position, Size size) {
+  void _approachStation(ArcadeStation station) {
+    final currentWorld = _world;
+    if (currentWorld == null) return;
+
+    _stopPathMovement();
+    _path.clear();
+    _pendingStationId = null;
+
+    final playerPosition = currentWorld.playerPosition;
+    final adjacentPositions = <GridPosition>[
+      station.position.copyWith(y: station.position.y - 1),
+      station.position.copyWith(y: station.position.y + 1),
+      station.position.copyWith(x: station.position.x - 1),
+      station.position.copyWith(x: station.position.x + 1),
+    ];
+
+    List<GridPosition>? bestPath;
+
+    for (final goal in adjacentPositions) {
+      if (!currentWorld.grid.isWalkable(goal)) continue;
+
+      final candidatePath = _pathFinder.findPath(
+        grid: currentWorld.grid,
+        start: playerPosition,
+        goal: goal,
+      );
+
+      if (candidatePath == null) continue;
+
+      if (bestPath == null || candidatePath.length < bestPath.length) {
+        bestPath = candidatePath;
+      }
+    }
+
+    if (bestPath == null) return;
+
+    // Already standing on a valid adjacent tile.
+    if (bestPath.length == 1) {
+      _faceAndShowStation(station);
+      return;
+    }
+
+    _pendingStationId = station.id;
+    _path = bestPath.skip(1).toList();
+    _startPathMovement();
+  }
+
+  void _faceAndShowStation(ArcadeStation station) {
+    final currentWorld = _world;
+    if (currentWorld == null) return;
+
+    if (!currentWorld.facePosition(station.position)) return;
+
+    setState(() {});
+    _showStationDialog(station);
+  }
+
+  void _completePendingStationInteraction() {
+    final stationId = _pendingStationId;
     final currentWorld = _world;
 
+    if (stationId == null || currentWorld == null) return;
+
+    ArcadeStation? station;
+
+    for (final candidate in currentWorld.stations) {
+      if (candidate.id == stationId) {
+        station = candidate;
+        break;
+      }
+    }
+
+    _pendingStationId = null;
+
+    if (station == null) return;
+
+    // Only interact if we're actually adjacent now.
+    final dx = (station.position.x - currentWorld.playerPosition.x).abs();
+    final dy = (station.position.y - currentWorld.playerPosition.y).abs();
+
+    if (dx + dy != 1) return;
+
+    _faceAndShowStation(station);
+  }
+
+  void _showStationDialog(ArcadeStation station) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(station.label),
+          content: const Text('Ready to play this game?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text('Not now'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                context.go(station.routeName);
+              },
+              child: const Text('Play'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _handleTap(Offset position, Size size) {
+    final currentWorld = _world;
     if (currentWorld == null) return;
+
+    final station = _stationAtScreenPosition(position, size);
+
+    if (station != null) {
+      _approachStation(station);
+
+      return;
+    }
+
+    // A new floor destination cancels any pending interaction.
+    _pendingStationId = null;
 
     final target = _screenToGrid(position, size);
 
@@ -141,14 +265,14 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     final currentWorld = _world;
 
     if (currentWorld == null || _path.isEmpty) {
-      _pathMovementTimer?.cancel();
-      _pathMovementTimer = null;
-
+      _stopPathMovement();
+      if (_pendingStationId != null) {
+        _completePendingStationInteraction();
+      }
       return;
     }
 
     final next = _path.removeAt(0);
-
     final dx = next.x - currentWorld.playerPosition.x;
     final dy = next.y - currentWorld.playerPosition.y;
 
@@ -156,13 +280,18 @@ class _ArcadeScreenState extends State<ArcadeScreen>
       if (currentWorld.movePlayer(dx, dy)) {
         _camera.follow(currentWorld.playerPosition, projection: _projection);
       } else {
+        // Stop if the world changed or the next move is blocked.
         _path.clear();
+        _pendingStationId = null;
       }
     });
 
     if (_path.isEmpty) {
-      _pathMovementTimer?.cancel();
-      _pathMovementTimer = null;
+      _stopPathMovement();
+
+      if (_pendingStationId != null) {
+        _completePendingStationInteraction();
+      }
     }
   }
 
@@ -190,6 +319,8 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
       // Keyboard movement takes priority over an existing
       // click-to-move path.
+      _pendingStationId = null;
+
       _path.clear();
 
       _stopPathMovement();
@@ -271,7 +402,6 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
   void _moveFromHeldKeys() {
     final currentWorld = _world;
-
     if (currentWorld == null) return;
 
     var dx = 0;
@@ -312,40 +442,50 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   }
 
   void _tryInteract() {
-    final currentWorld = _world;
-
-    if (currentWorld == null) return;
-
-    final targetPosition = _positionInFrontOfPlayer();
-
-    ArcadeStation? targetStation;
-
-    for (final station in currentWorld.stations) {
-      if (station.position == targetPosition) {
-        targetStation = station;
-
-        break;
-      }
-    }
-
-    if (targetStation == null) return;
-
     final station = _stationInFrontOfPlayer();
-
     if (station == null) return;
 
-    context.go(targetStation.routeName);
+    _showStationDialog(station);
   }
 
   ArcadeStation? _stationInFrontOfPlayer() {
     final currentWorld = _world;
-
     if (currentWorld == null) return null;
 
     final targetPosition = _positionInFrontOfPlayer();
 
     for (final station in currentWorld.stations) {
       if (station.position == targetPosition) return station;
+    }
+
+    return null;
+  }
+
+  ArcadeStation? _stationAtScreenPosition(Offset tapPosition, Size size) {
+    final currentWorld = _world;
+    if (currentWorld == null) return null;
+
+    final center = Offset(size.width / 2, size.height / 2);
+    final cameraOffset = center - _camera.position;
+
+    for (final station in currentWorld.stations) {
+      final groundPosition =
+          cameraOffset + _projection.worldToScreen(station.position);
+
+      final left = groundPosition.dx - visualConfig.tileWidth / 2;
+      final top =
+          groundPosition.dy -
+          visualConfig.stationHeight +
+          visualConfig.tileHeight / 2;
+
+      final bounds = Rect.fromLTWH(
+        left,
+        top,
+        visualConfig.tileWidth,
+        visualConfig.stationHeight,
+      );
+
+      if (bounds.contains(tapPosition)) return station;
     }
 
     return null;
