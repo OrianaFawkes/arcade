@@ -44,7 +44,7 @@ class GameController {
   bool get justWon => _justWon;
   bool get isGameOver => !canMove();
   bool get hasWon => _tiles.any((tile) => tile.value >= targetValue);
-  bool get hasBoardJiggle => _hasBoardJiggle ?? true;
+  bool get hasBoardJiggle => _hasBoardJiggle ?? false;
 
   Future<void> initialize() async {
     try {
