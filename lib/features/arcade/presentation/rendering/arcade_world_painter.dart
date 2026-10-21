@@ -1,6 +1,10 @@
+import 'package:arcade/features/arcade/config/arcade_visual_config.dart';
 import 'package:arcade/features/arcade/presentation/camera/arcade_camera.dart';
 import 'package:arcade/features/arcade/domain/arcade_world.dart';
 import 'package:arcade/features/arcade/domain/grid_position.dart';
+import 'package:arcade/features/arcade/presentation/rendering/arcade_pixel_sprite_painter.dart';
+import 'package:arcade/features/arcade/presentation/rendering/arcade_sprite_registry.dart';
+import 'package:arcade/features/arcade/presentation/rendering/arcade_tile_resolver.dart';
 import 'package:arcade/features/arcade/presentation/rendering/top_down_projection.dart';
 import 'package:flutter/material.dart';
 
@@ -11,10 +15,16 @@ class ArcadeWorldPainter extends CustomPainter {
 
   final TopDownProjection projection;
 
+  final ArcadeVisualConfig visualConfig;
+
+  final ArcadeTileResolver tileResolver;
+
   const ArcadeWorldPainter({
     required this.world,
     required this.camera,
     required this.projection,
+    required this.visualConfig,
+    this.tileResolver = const ArcadeTileResolver(),
   });
 
   @override
@@ -22,54 +32,34 @@ class ArcadeWorldPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final cameraOffset = center - camera.position;
 
-    final floorPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = const Color(0xFF3A3A3A);
-
-    final wallPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = const Color(0xFF111111);
-
-    final gridPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = const Color(0xFF666666);
-
     for (var y = 0; y < world.grid.height; y++) {
       for (var x = 0; x < world.grid.width; x++) {
         final position = GridPosition(x, y);
+
         final cell = world.grid.cellAt(position);
 
-        if (cell.terrain == .void_ || cell.terrain == .wall) {
-          continue;
-        }
+        // Floors belong to the background layer.
+        // Walls are rendered separately in depth order.
+        if (cell.terrain != .floor) continue;
 
         final tileCenter = cameraOffset + projection.worldToScreen(position);
 
-        final rect = Rect.fromCenter(
+        final spriteId = tileResolver.resolve(world, position);
+        final pixels = ArcadeSpriteRegistry.pixelsFor(spriteId);
+
+        final destination = Rect.fromCenter(
           center: tileCenter,
-          width: projection.tileWidth,
-          height: projection.tileHeight,
+          width: visualConfig.tileWidth,
+          height: visualConfig.tileHeight,
         );
 
-        switch (cell.terrain) {
-          case .floor:
-            canvas.drawRect(rect, floorPaint);
-            canvas.drawRect(rect, gridPaint);
-
-          case .wall:
-            canvas.drawRect(rect, wallPaint);
-            canvas.drawRect(rect, gridPaint);
-
-          case .void_:
-            break;
-        }
+        drawPixelSprite(canvas, pixels, destination);
       }
     }
   }
 
   @override
   bool shouldRepaint(covariant ArcadeWorldPainter oldDelegate) {
-    return true;
+    return false;
   }
 }

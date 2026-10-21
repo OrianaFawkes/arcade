@@ -5,6 +5,7 @@ import 'package:arcade/features/arcade/presentation/camera/arcade_camera.dart';
 import 'package:arcade/features/arcade/presentation/rendering/arcade_player.dart';
 import 'package:arcade/features/arcade/domain/arcade_station.dart';
 import 'package:arcade/features/arcade/presentation/rendering/arcade_cabinet.dart';
+import 'package:arcade/features/arcade/presentation/rendering/arcade_tile_resolver.dart';
 import 'package:arcade/features/arcade/presentation/rendering/arcade_wall.dart';
 import 'package:arcade/features/arcade/domain/arcade_world.dart';
 import 'package:arcade/features/arcade/data/arcade_world_loader.dart';
@@ -25,7 +26,7 @@ class ArcadeScreen extends StatefulWidget {
 
 class _ArcadeScreenState extends State<ArcadeScreen>
     with SingleTickerProviderStateMixin {
-  late final ArcadeVisualConfig visualConfig;
+  late final ArcadeVisualConfig _visualConfig;
 
   late final AnimationController _cameraController;
 
@@ -53,7 +54,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   void initState() {
     super.initState();
 
-    visualConfig = ArcadeVisualConfig(pixelScale: 2);
+    _visualConfig = ArcadeVisualConfig(pixelScale: 2);
 
     _cameraController = AnimationController(
       vsync: this,
@@ -95,8 +96,8 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     final loadedWorld = ArcadeWorld(layout: layout);
 
     final loadedProjection = TopDownProjection(
-      tileWidth: visualConfig.tileWidth,
-      tileHeight: visualConfig.tileHeight,
+      tileWidth: _visualConfig.tileWidth,
+      tileHeight: _visualConfig.tileHeight,
     );
 
     _camera.snapTo(loadedWorld.playerPosition, projection: loadedProjection);
@@ -472,17 +473,17 @@ class _ArcadeScreenState extends State<ArcadeScreen>
       final groundPosition =
           cameraOffset + _projection.worldToScreen(station.position);
 
-      final left = groundPosition.dx - visualConfig.tileWidth / 2;
+      final left = groundPosition.dx - _visualConfig.tileWidth / 2;
       final top =
           groundPosition.dy -
-          visualConfig.stationHeight +
-          visualConfig.tileHeight / 2;
+          _visualConfig.stationHeight +
+          _visualConfig.tileHeight / 2;
 
       final bounds = Rect.fromLTWH(
         left,
         top,
-        visualConfig.tileWidth,
-        visualConfig.stationHeight,
+        _visualConfig.tileWidth,
+        _visualConfig.stationHeight,
       );
 
       if (bounds.contains(tapPosition)) return station;
@@ -540,13 +541,18 @@ class _ArcadeScreenState extends State<ArcadeScreen>
                 final groundPosition =
                     tileCenter + Offset(0, _projection.tileHeight / 2);
 
+                final spriteId = ArcadeTileResolver().resolve(
+                  currentWorld,
+                  position,
+                );
+
                 depthObjects.add((
                   depth: groundPosition.dy,
                   widget: ArcadeWall(
                     key: ValueKey('wall-$x-$y'),
-                    spriteAsset: 'assets/sprites/wall/arcade-wall.png',
+                    spriteId: spriteId,
                     groundPosition: groundPosition,
-                    visualConfig: visualConfig,
+                    visualConfig: _visualConfig,
                   ),
                 ));
               }
@@ -564,7 +570,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
                   spriteAsset: 'assets/sprites/cabinet/arcade_cabinet.png',
                   groundPosition: groundPosition,
                   canInteract: _stationInFrontOfPlayer()?.id == station.id,
-                  visualConfig: visualConfig,
+                  visualConfig: _visualConfig,
                 ),
               ));
             }
@@ -576,7 +582,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
                 direction: currentWorld.playerDirection,
                 groundPosition: playerScreenPosition,
                 isMoving: _heldKeys.any(_isMovementKey) || _path.isNotEmpty,
-                visualConfig: visualConfig,
+                visualConfig: _visualConfig,
               ),
             ));
 
@@ -593,6 +599,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
                       world: currentWorld,
                       camera: _camera,
                       projection: _projection,
+                      visualConfig: _visualConfig,
                     ),
                     size: size,
                   ),

@@ -34,5 +34,4 @@ flutter:
   assets:
     - assets/sprites/cabinet/
     - assets/sprites/player/
-    - assets/sprites/wall/
     - assets/worlds/
