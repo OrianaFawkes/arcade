@@ -1,10 +1,12 @@
 import 'package:arcade/features/powers_of_two/presentation/tile_color_scheme.dart';
 import 'package:arcade/features/powers_of_two/presentation/tile_widget.dart';
+import 'package:arcade/shared/presentation/widgets/pixel_button.dart';
 import 'package:flutter/material.dart';
 import 'package:arcade/features/powers_of_two/game/game_controller.dart';
 import 'package:arcade/features/powers_of_two/models/move_direction.dart';
 import 'package:arcade/features/powers_of_two/models/tile.dart';
 import 'package:arcade/shared/presentation/widgets/pixel_card.dart';
+import 'package:smart_padding/smart_padding.dart';
 
 class Board extends StatefulWidget {
   final List<Tile> tiles;
@@ -116,8 +118,8 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     final textTheme = Theme.of(context).textTheme;
 
     return PixelCard(
-      borderColor: Color(0xFF2D1B1B),
-      fillColor: Color(0xFF614E4E).withValues(alpha: 0.1),
+      borderColor: Color(0xFFF2D3F2),
+      fillColor: Color(0xFF36343D).withValues(alpha: 0.8),
       padding: .zero,
       radius: 6,
       child: Center(
@@ -125,27 +127,40 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
           mainAxisSize: .min,
           spacing: 8.0,
           children: [
-            Text(
-              'You Win!',
-              style: textTheme.titleLarge?.copyWith(color: Color(0xFFECCEC3)),
-            ),
-            Text(
-              'Score: ${widget.score}',
-              style: textTheme.bodyLarge?.copyWith(color: Color(0xFFECCEC3)),
-            ),
-            Row(
-              mainAxisSize: .min,
-              spacing: 8.0,
-              children: [
-                ElevatedButton(
-                  onPressed: widget.onContinue,
-                  child: Text('Continue'),
-                ),
-                ElevatedButton(
-                  onPressed: widget.onRestart,
-                  child: Text('Restart'),
-                ),
-              ],
+            Text('You Win!', style: textTheme.titleLarge),
+            Text('Score: ${widget.score}', style: textTheme.bodyLarge),
+            SmartPadding(
+              horizontal: 32.0,
+              vertical: 16.0,
+              child: Row(
+                spacing: 8.0,
+                children: [
+                  Expanded(
+                    child: PixelButton(
+                      height: 36.0,
+                      onPressed: widget.onContinue,
+                      child: Text(
+                        'Continue',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Color(0xFF383138),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: PixelButton(
+                      height: 36.0,
+                      onPressed: widget.onRestart,
+                      child: Text(
+                        'Restart',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Color(0xFF383138),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -157,8 +172,8 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
     final textTheme = Theme.of(context).textTheme;
 
     return PixelCard(
-      borderColor: Color(0xFF2D1B1B),
-      fillColor: Color(0xFF614E4E).withValues(alpha: 0.1),
+      borderColor: Color(0xFFF2D3F2),
+      fillColor: Color(0xFF36343D).withValues(alpha: 0.8),
       padding: .zero,
       radius: 6,
       child: Center(
@@ -166,15 +181,22 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
           mainAxisSize: .min,
           spacing: 8.0,
           children: [
-            Text(
-              'Game Over',
-              style: textTheme.titleLarge?.copyWith(color: Color(0xFFECCEC3)),
+            Text('Game Over', style: textTheme.titleLarge),
+            Text('Score: ${widget.score}', style: textTheme.bodyLarge),
+            SmartPadding(
+              horizontal: 32.0,
+              vertical: 16.0,
+              child: PixelButton(
+                height: 36.0,
+                onPressed: widget.onRestart,
+                child: Text(
+                  'Restart',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: Color(0xFF383138)),
+                ),
+              ),
             ),
-            Text(
-              'Score: ${widget.score}',
-              style: textTheme.bodyLarge?.copyWith(color: Color(0xFFECCEC3)),
-            ),
-            ElevatedButton(onPressed: widget.onRestart, child: Text('Restart')),
           ],
         ),
       ),
@@ -206,8 +228,8 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
           alignment: .center,
           children: [
             PixelCard(
-              borderColor: Color(0xFF2D1B1B),
-              fillColor: Color(0xFF614E4E),
+              borderColor: Color(0xFFF2D3F2),
+              fillColor: Color(0xFF36343D),
               padding: .zero,
               radius: 6,
               child: Stack(
@@ -221,8 +243,8 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
                         width: cellSize,
                         height: cellSize,
                         child: PixelCard(
-                          borderColor: Color(0xFF614E4E),
-                          fillColor: Color(0xFF947676),
+                          borderColor: Color(0xFF36343D),
+                          fillColor: Color(0xFF625C6B),
                           offset: .zero,
                           child: SizedBox(),
                         ),
