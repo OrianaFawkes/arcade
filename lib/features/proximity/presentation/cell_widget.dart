@@ -19,15 +19,15 @@ class CellWidget extends StatelessWidget {
 
   Color _numberColor(int value) {
     return switch (value) {
-      1 => Color(0xFF2457A6),
-      2 => Color(0xFF2D7A32),
-      3 => Color(0xFFC53B32),
-      4 => Color(0xFF5B3B8C),
-      5 => Color(0xFF8C3028),
-      6 => Color(0xFF267F7F),
-      7 => Color(0xFF2D2D2D),
-      8 => Color(0xFF666666),
-      _ => Color(0xFF2D1B1B),
+      1 => const Color(0xFF6495ED),
+      2 => const Color(0xFF4CAF50),
+      3 => const Color(0xFFE57373),
+      4 => const Color(0xFFB39DDB),
+      5 => const Color(0xFFFF8A65),
+      6 => const Color(0xFF4DB6AC),
+      7 => const Color(0xFFE0E0E0),
+      8 => const Color(0xFFB0BEC5),
+      _ => const Color(0xFFF2D3F2),
     };
   }
 
@@ -36,14 +36,14 @@ class CellWidget extends StatelessWidget {
 
     if (!cell.isRevealed) {
       if (cell.isFlagged) {
-        return Icon(Icons.flag_rounded, size: 18, color: Color(0xFF2D1B1B));
+        return Icon(Icons.flag_rounded, size: 18, color: Color(0xFF36343D));
       }
 
       return SizedBox();
     }
 
     if (cell.hasMine) {
-      return Icon(Icons.circle, size: 18, color: Color(0xFF2D1B1B));
+      return Icon(Icons.circle, size: 18, color: Color(0xFF36343D));
     }
 
     if (cell.adjacentMines == 0) {
@@ -54,7 +54,7 @@ class CellWidget extends StatelessWidget {
       '${cell.adjacentMines}',
       style: textTheme.titleMedium?.copyWith(
         color: _numberColor(cell.adjacentMines),
-        fontWeight: FontWeight.bold,
+        fontWeight: .bold,
       ),
     );
   }
@@ -68,8 +68,8 @@ class CellWidget extends StatelessWidget {
       onLongPress: onLongPress,
       onSecondaryTap: onSecondaryTap,
       child: PixelCard(
-        borderColor: isRevealed ? Color(0xFF614E4E) : Color(0xFF2D1B1B),
-        fillColor: isRevealed ? Color(0xFFD8C6B8) : Color(0xFF947676),
+        borderColor: isRevealed ? Color(0xFF36343D) : Color(0xFF36343D),
+        fillColor: isRevealed ? Color(0xFF625C6B) : Color(0xFFF2D3F2),
         offset: .zero,
         padding: .zero,
         radius: 2,

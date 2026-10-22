@@ -269,6 +269,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  smart_padding:
+    dependency: "direct main"
+    description:
+      name: smart_padding
+      sha256: "6b98048ecbd30f37174176df63a26e499399dd2511564244439de581b0b05f99"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   source_span:
     dependency: transitive
     description:

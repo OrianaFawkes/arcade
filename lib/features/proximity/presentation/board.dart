@@ -43,10 +43,10 @@ class Board extends StatelessWidget {
           width: boardWidth,
           height: boardHeight,
           child: PixelCard(
-            borderColor: Color(0xFF2D1B1B),
-            fillColor: Color(0xFF614E4E),
+            borderColor: Color(0xFFF2D3F2),
+            fillColor: Color(0xFF36343D),
             padding: .all(boardPadding),
-            radius: 6,
+            radius: 4,
             child: GridView.builder(
               physics: NeverScrollableScrollPhysics(),
               padding: .zero,

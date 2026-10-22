@@ -20,12 +20,12 @@ class DialogContainer extends StatelessWidget {
     final bottomPadding = viewInsets > 0.0 ? viewInsets : 0.0;
 
     final dialogPanel = PixelPanelPainter(
-      borderColor: Color(0xFF614E4E),
-      fillColor: Color(0xFFECCEC3),
+      borderColor: Color(0xFFF2D3F2),
+      fillColor: Color(0xFF36343D),
       radius: 4,
     );
 
-    final shadowPanel = dialogPanel.copyWith(baseColor: Color(0xFF614E4E));
+    final shadowPanel = dialogPanel.copyWith(baseColor: Color(0xFFF2D3F2));
 
     return Center(
       child: Material(

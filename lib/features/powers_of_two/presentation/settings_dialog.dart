@@ -44,7 +44,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                       child: PixelCard(
                         borderColor:
                             widget.game.tileBaseColor == preset.baseColor
-                            ? Color(0xFF2D1B1B)
+                            ? Color(0xFFF2D3F2)
                             : preset.baseColor,
                         fillColor: preset.baseColor,
                         radius: 6,

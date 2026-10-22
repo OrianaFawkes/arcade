@@ -100,11 +100,9 @@ class _ArcadePlayerState extends State<ArcadePlayer>
     final shadowWidth = widget.visualConfig.playerShadowWidth;
     final shadowHeight = widget.visualConfig.playerShadowHeight;
 
-    final heightOffset = widget.visualConfig.tileHeight / 3;
-
     return Positioned(
       left: widget.groundPosition.dx - spriteWidth / 2,
-      top: widget.groundPosition.dy - spriteHeight + heightOffset,
+      top: widget.groundPosition.dy - spriteHeight,
       width: spriteWidth,
       height: spriteHeight,
       child: AnimatedBuilder(

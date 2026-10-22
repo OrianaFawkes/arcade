@@ -5,6 +5,8 @@ import 'package:arcade/features/arcade/presentation/camera/arcade_camera.dart';
 import 'package:arcade/features/arcade/presentation/rendering/arcade_player.dart';
 import 'package:arcade/features/arcade/domain/arcade_station.dart';
 import 'package:arcade/features/arcade/presentation/rendering/arcade_cabinet.dart';
+import 'package:arcade/features/arcade/presentation/rendering/arcade_sprite_cache.dart';
+import 'package:arcade/features/arcade/presentation/rendering/arcade_tile_resolver.dart';
 import 'package:arcade/features/arcade/presentation/rendering/arcade_wall.dart';
 import 'package:arcade/features/arcade/domain/arcade_world.dart';
 import 'package:arcade/features/arcade/data/arcade_world_loader.dart';
@@ -12,9 +14,10 @@ import 'package:arcade/features/arcade/presentation/rendering/arcade_world_paint
 import 'package:arcade/features/arcade/domain/grid_position.dart';
 import 'package:arcade/features/arcade/presentation/rendering/top_down_projection.dart';
 import 'package:arcade/features/arcade/domain/path_finder.dart';
+import 'package:arcade/features/arcade/presentation/station_dialog.dart';
+import 'package:arcade/shared/presentation/dialogs/app_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 
 class ArcadeScreen extends StatefulWidget {
   const ArcadeScreen({super.key});
@@ -25,7 +28,7 @@ class ArcadeScreen extends StatefulWidget {
 
 class _ArcadeScreenState extends State<ArcadeScreen>
     with SingleTickerProviderStateMixin {
-  late final ArcadeVisualConfig visualConfig;
+  late final ArcadeVisualConfig _visualConfig;
 
   late final AnimationController _cameraController;
 
@@ -53,7 +56,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   void initState() {
     super.initState();
 
-    visualConfig = ArcadeVisualConfig(pixelScale: 2);
+    _visualConfig = ArcadeVisualConfig(pixelScale: 2);
 
     _cameraController = AnimationController(
       vsync: this,
@@ -95,8 +98,8 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     final loadedWorld = ArcadeWorld(layout: layout);
 
     final loadedProjection = TopDownProjection(
-      tileWidth: visualConfig.tileWidth,
-      tileHeight: visualConfig.tileHeight,
+      tileWidth: _visualConfig.tileWidth,
+      tileHeight: _visualConfig.tileHeight,
     );
 
     _camera.snapTo(loadedWorld.playerPosition, projection: loadedProjection);
@@ -164,14 +167,19 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     _startPathMovement();
   }
 
-  void _faceAndShowStation(ArcadeStation station) {
+  Future<void> _faceAndShowStation(ArcadeStation station) async {
     final currentWorld = _world;
     if (currentWorld == null) return;
 
     if (!currentWorld.facePosition(station.position)) return;
 
     setState(() {});
-    _showStationDialog(station);
+
+    await showAppDialog(
+      context: context,
+      barrierLabel: 'Station',
+      widget: StationDialog(station: station),
+    );
   }
 
   void _completePendingStationInteraction() {
@@ -200,33 +208,6 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     if (dx + dy != 1) return;
 
     _faceAndShowStation(station);
-  }
-
-  void _showStationDialog(ArcadeStation station) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(station.label),
-          content: const Text('Ready to play this game?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text('Not now'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                context.go(station.routeName);
-              },
-              child: const Text('Play'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _handleTap(Offset position, Size size) {
@@ -441,11 +422,15 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     };
   }
 
-  void _tryInteract() {
+  Future<void> _tryInteract() async {
     final station = _stationInFrontOfPlayer();
     if (station == null) return;
 
-    _showStationDialog(station);
+    await showAppDialog(
+      context: context,
+      barrierLabel: 'Station',
+      widget: StationDialog(station: station),
+    );
   }
 
   ArcadeStation? _stationInFrontOfPlayer() {
@@ -472,17 +457,17 @@ class _ArcadeScreenState extends State<ArcadeScreen>
       final groundPosition =
           cameraOffset + _projection.worldToScreen(station.position);
 
-      final left = groundPosition.dx - visualConfig.tileWidth / 2;
+      final left = groundPosition.dx - _visualConfig.tileWidth / 2;
       final top =
           groundPosition.dy -
-          visualConfig.stationHeight +
-          visualConfig.tileHeight / 2;
+          _visualConfig.stationHeight +
+          _visualConfig.tileHeight / 2;
 
       final bounds = Rect.fromLTWH(
         left,
         top,
-        visualConfig.tileWidth,
-        visualConfig.stationHeight,
+        _visualConfig.tileWidth,
+        _visualConfig.stationHeight,
       );
 
       if (bounds.contains(tapPosition)) return station;
@@ -514,95 +499,116 @@ class _ArcadeScreenState extends State<ArcadeScreen>
           }
         },
         onKeyEvent: _handleKeyEvent,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final size = Size(constraints.maxWidth, constraints.maxHeight);
-
-            final center = Offset(size.width / 2, size.height / 2);
-            final cameraOffset = center - _camera.position;
-
-            final playerScreenPosition =
-                cameraOffset +
-                _projection.worldToScreen(currentWorld.playerPosition);
-
-            final depthObjects = <({double depth, Widget widget})>[];
-
-            for (var y = 0; y < currentWorld.grid.height; y++) {
-              for (var x = 0; x < currentWorld.grid.width; x++) {
-                final position = GridPosition(x, y);
-                final cell = currentWorld.grid.cellAt(position);
-
-                if (cell.terrain != .wall) continue;
-
-                final tileCenter =
-                    cameraOffset + _projection.worldToScreen(position);
-
-                final groundPosition =
-                    tileCenter + Offset(0, _projection.tileHeight / 2);
-
-                depthObjects.add((
-                  depth: groundPosition.dy,
-                  widget: ArcadeWall(
-                    key: ValueKey('wall-$x-$y'),
-                    spriteAsset: 'assets/sprites/wall/arcade-wall.png',
-                    groundPosition: groundPosition,
-                    visualConfig: visualConfig,
-                  ),
-                ));
-              }
+        child: FutureBuilder<void>(
+          future: ArcadeSpriteCache.instance.initialize(),
+          builder: (_, snapshot) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Text('Failed to initialize arcade sprites.'),
+              );
             }
 
-            for (final station in currentWorld.stations) {
-              final groundPosition =
-                  cameraOffset + _projection.worldToScreen(station.position);
-
-              depthObjects.add((
-                depth: groundPosition.dy,
-                widget: ArcadeCabinet(
-                  key: ValueKey('station-${station.id}'),
-                  label: station.label,
-                  spriteAsset: 'assets/sprites/cabinet/arcade_cabinet.png',
-                  groundPosition: groundPosition,
-                  canInteract: _stationInFrontOfPlayer()?.id == station.id,
-                  visualConfig: visualConfig,
-                ),
-              ));
+            if (snapshot.connectionState != .done) {
+              return SizedBox.expand();
             }
 
-            depthObjects.add((
-              depth: playerScreenPosition.dy,
-              widget: ArcadePlayer(
-                key: ValueKey('arcade-player'),
-                direction: currentWorld.playerDirection,
-                groundPosition: playerScreenPosition,
-                isMoving: _heldKeys.any(_isMovementKey) || _path.isNotEmpty,
-                visualConfig: visualConfig,
-              ),
-            ));
-
-            depthObjects.sort((a, b) => a.depth.compareTo(b.depth));
-
-            return GestureDetector(
-              behavior: .opaque,
-              onTapDown: (details) => _handleTap(details.localPosition, size),
-              child: Stack(
-                clipBehavior: .hardEdge,
-                children: [
-                  CustomPaint(
-                    painter: ArcadeWorldPainter(
-                      world: currentWorld,
-                      camera: _camera,
-                      projection: _projection,
-                    ),
-                    size: size,
-                  ),
-                  ...depthObjects.map((item) => item.widget),
-                ],
-              ),
-            );
+            return buildArcadeWorld(world: currentWorld);
           },
         ),
       ),
+    );
+  }
+
+  Widget buildArcadeWorld({required ArcadeWorld world}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = Size(constraints.maxWidth, constraints.maxHeight);
+
+        final center = Offset(size.width / 2, size.height / 2);
+        final cameraOffset = center - _camera.position;
+
+        final playerScreenPosition =
+            cameraOffset + _projection.worldToScreen(world.playerPosition);
+
+        final depthObjects = <({double depth, Widget widget})>[];
+
+        for (var y = 0; y < world.grid.height; y++) {
+          for (var x = 0; x < world.grid.width; x++) {
+            final position = GridPosition(x, y);
+            final cell = world.grid.cellAt(position);
+
+            if (cell.terrain != .wall) continue;
+
+            final tileCenter =
+                cameraOffset + _projection.worldToScreen(position);
+
+            final groundPosition =
+                tileCenter + Offset(0, _projection.tileHeight / 2);
+
+            final spriteId = ArcadeTileResolver().resolve(world, position);
+
+            depthObjects.add((
+              depth: groundPosition.dy,
+              widget: ArcadeWall(
+                key: ValueKey('wall-$x-$y'),
+                spriteId: spriteId,
+                groundPosition: groundPosition,
+                visualConfig: _visualConfig,
+              ),
+            ));
+          }
+        }
+
+        for (final station in world.stations) {
+          final groundPosition =
+              cameraOffset + _projection.worldToScreen(station.position);
+
+          depthObjects.add((
+            depth: groundPosition.dy,
+            widget: ArcadeCabinet(
+              key: ValueKey('station-${station.id}'),
+              label: station.label,
+              spriteAsset: 'assets/sprites/cabinet/arcade_cabinet.png',
+              groundPosition: groundPosition,
+              canInteract: _stationInFrontOfPlayer()?.id == station.id,
+              visualConfig: _visualConfig,
+            ),
+          ));
+        }
+
+        depthObjects.add((
+          depth: playerScreenPosition.dy,
+          widget: ArcadePlayer(
+            key: ValueKey('arcade-player'),
+            direction: world.playerDirection,
+            groundPosition: playerScreenPosition,
+            isMoving: _heldKeys.any(_isMovementKey) || _path.isNotEmpty,
+            visualConfig: _visualConfig,
+          ),
+        ));
+
+        depthObjects.sort((a, b) => a.depth.compareTo(b.depth));
+
+        return GestureDetector(
+          behavior: .opaque,
+          onTapDown: (details) => _handleTap(details.localPosition, size),
+          child: Stack(
+            clipBehavior: .hardEdge,
+            children: [
+              CustomPaint(
+                painter: ArcadeWorldPainter(
+                  world: world,
+                  camera: _camera,
+                  projection: _projection,
+                  visualConfig: _visualConfig,
+                ),
+                size: size,
+              ),
+              ...depthObjects.map((item) => item.widget),
+            ],
+          ),
+        );
+      },
     );
   }
 }

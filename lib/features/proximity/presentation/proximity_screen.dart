@@ -4,6 +4,8 @@ import 'package:arcade/features/proximity/presentation/board.dart';
 import 'package:arcade/features/proximity/game/game_storage.dart';
 import 'package:arcade/features/proximity/game/game_controller.dart';
 import 'package:arcade/features/proximity/models/difficulty.dart';
+import 'package:arcade/features/proximity/presentation/difficulty_dialog.dart';
+import 'package:arcade/shared/presentation/dialogs/app_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -122,39 +124,13 @@ class _ProximityScreenState extends State<ProximityScreen> {
   }
 
   Future<void> _selectDifficulty() async {
-    final localGame = game;
-    if (localGame == null) return;
+    if (game == null) return;
 
-    final selectedDifficulty = await showDialog<Difficulty>(
+    await showAppDialog(
       context: context,
-      builder: (dialogContext) {
-        return SimpleDialog(
-          title: Text('Difficulty'),
-          children: [
-            for (final difficulty in Difficulty.values)
-              SimpleDialogOption(
-                onPressed: () {
-                  Navigator.pop(dialogContext, difficulty);
-                },
-                child: Row(
-                  children: [
-                    Expanded(child: Text(_difficultyLabel(difficulty))),
-                    if (difficulty == localGame.difficulty)
-                      const Icon(Icons.check_rounded),
-                  ],
-                ),
-              ),
-          ],
-        );
-      },
+      barrierLabel: 'Difficulty',
+      widget: DifficultyDialog(game: game!),
     );
-
-    if (selectedDifficulty == null ||
-        selectedDifficulty == localGame.difficulty) {
-      return;
-    }
-
-    await localGame.startGame(selectedDifficulty);
 
     if (!mounted) return;
 
@@ -184,7 +160,7 @@ class _ProximityScreenState extends State<ProximityScreen> {
                 mainAxisSize: MainAxisSize.min,
                 spacing: 4.0,
                 children: [
-                  Icon(Icons.flag_rounded, size: 16),
+                  Icon(Icons.flag_rounded, size: 16, color: Color(0xFFF2D3F2)),
                   Text(
                     '${localGame.difficulty.mineCount - localGame.flagsUsed}',
                   ),
@@ -198,12 +174,12 @@ class _ProximityScreenState extends State<ProximityScreen> {
           ),
           IconButton(
             onPressed: _selectDifficulty,
-            icon: Icon(Icons.tune_rounded),
+            icon: Icon(Icons.tune_rounded, color: Color(0xFFF2D3F2)),
             tooltip: 'Change difficulty',
           ),
           IconButton(
             onPressed: _restart,
-            icon: Icon(Icons.refresh_rounded),
+            icon: Icon(Icons.refresh_rounded, color: Color(0xFFF2D3F2)),
             tooltip: 'Restart',
           ),
         ],

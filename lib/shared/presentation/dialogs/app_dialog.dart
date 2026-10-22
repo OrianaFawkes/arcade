@@ -11,7 +11,7 @@ Future<T?> showAppDialog<T>({
     context: context,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
-    barrierColor: Color(0xFF2D1B1B).withValues(alpha: 0.2),
+    barrierColor: Color(0xFF383138).withValues(alpha: 0.2),
     transitionDuration: Duration(milliseconds: 320),
     pageBuilder: (_, _, _) => widget,
     transitionBuilder: (_, animation, _, child) {
