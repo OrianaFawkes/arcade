@@ -177,7 +177,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     await showAppDialog(
       context: context,
-      barrierLabel: 'Settings',
+      barrierLabel: 'Station',
       widget: StationDialog(station: station),
     );
   }
@@ -428,7 +428,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
     await showAppDialog(
       context: context,
-      barrierLabel: 'Settings',
+      barrierLabel: 'Station',
       widget: StationDialog(station: station),
     );
   }

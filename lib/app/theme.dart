@@ -5,12 +5,17 @@ ThemeData createTheme() {
     colorScheme: .fromSeed(
       seedColor: Color(0xFFF2D3F2),
       surface: Color(0xFF383138),
-      onSurface: Color(0xFF383138),
+      onSurface: Color(0xFFF2D3F2),
     ),
     textTheme: TextTheme(
       titleLarge: TextStyle(
         color: Color(0xFFF2D3F2),
         fontSize: 22.0,
+        letterSpacing: -0.75,
+      ),
+      titleMedium: TextStyle(
+        color: Color(0xFFF2D3F2),
+        fontSize: 18.0,
         letterSpacing: -0.75,
       ),
       bodyLarge: TextStyle(

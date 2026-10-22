@@ -19,7 +19,7 @@ class TileColorScheme {
   ];
 
   Color fillColor(int value) {
-    if (value > 2048) return Color.lerp(baseColor, Color(0xFF2D1B1B), 0.65)!;
+    if (value > 2048) return Color.lerp(baseColor, Color(0xFF383138), 0.65)!;
 
     final exponent = _log2(value);
 
@@ -29,19 +29,19 @@ class TileColorScheme {
     // 2048 -> 1.0
     final t = (exponent - 1) / 10;
 
-    return .lerp(Color(0xFFECCEC3), baseColor, t.clamp(0.0, 1.0))!;
+    return .lerp(Color(0xFFF2D3F2), baseColor, t.clamp(0.0, 1.0))!;
   }
 
   Color borderColor(int value) {
-    return .lerp(fillColor(value), Color(0xFF2D1B1B), 0.15)!;
+    return .lerp(fillColor(value), Color(0xFF383138), 0.15)!;
   }
 
   Color textColor(int value) {
     final color = fillColor(value);
 
     return ThemeData.estimateBrightnessForColor(color) == .dark
-        ? Color(0xFFECCEC3)
-        : Color(0xFF2D1B1B);
+        ? Color(0xFFF2D3F2)
+        : Color(0xFF383138);
   }
 
   int _log2(int value) {

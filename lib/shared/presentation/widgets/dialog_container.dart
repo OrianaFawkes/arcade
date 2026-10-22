@@ -21,7 +21,7 @@ class DialogContainer extends StatelessWidget {
 
     final dialogPanel = PixelPanelPainter(
       borderColor: Color(0xFFF2D3F2),
-      fillColor: Color(0xFF383138),
+      fillColor: Color(0xFF36343D),
       radius: 4,
     );
 

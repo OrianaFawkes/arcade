@@ -4,16 +4,11 @@ import 'package:arcade/shared/presentation/widgets/pixel_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class StationDialog extends StatefulWidget {
+class StationDialog extends StatelessWidget {
   final ArcadeStation station;
 
   const StationDialog({super.key, required this.station});
 
-  @override
-  State<StationDialog> createState() => _StationDialogState();
-}
-
-class _StationDialogState extends State<StationDialog> {
   @override
   Widget build(BuildContext context) {
     return DialogContainer(
@@ -23,7 +18,7 @@ class _StationDialogState extends State<StationDialog> {
         spacing: 16.0,
         children: [
           Text(
-            widget.station.label,
+            station.label,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           Text(
@@ -52,7 +47,7 @@ class _StationDialogState extends State<StationDialog> {
                   height: 36.0,
                   onPressed: () {
                     Navigator.of(context).pop();
-                    context.go(widget.station.routeName);
+                    context.go(station.routeName);
                   },
                   child: Text(
                     'Play',

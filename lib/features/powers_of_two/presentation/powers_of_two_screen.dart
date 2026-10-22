@@ -188,8 +188,6 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
     if (!mounted) return;
 
     setState(() {});
-
-    return;
   }
 
   @override
@@ -222,17 +220,17 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
               ),
               IconButton(
                 onPressed: _showSettings,
-                icon: Icon(Icons.settings_rounded),
+                icon: Icon(Icons.settings_rounded, color: Color(0xFFF2D3F2)),
                 tooltip: 'Settings',
               ),
               IconButton(
                 onPressed: game!.canUndo ? _undo : null,
-                icon: Icon(Icons.undo_rounded),
+                icon: Icon(Icons.undo_rounded, color: Color(0xFFF2D3F2)),
                 tooltip: 'Undo (Z)',
               ),
               IconButton(
                 onPressed: _restart,
-                icon: Icon(Icons.refresh_rounded),
+                icon: Icon(Icons.refresh_rounded, color: Color(0xFFF2D3F2)),
                 tooltip: 'Restart (R)',
               ),
             ],
