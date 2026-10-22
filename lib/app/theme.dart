@@ -31,11 +31,11 @@ ThemeData createTheme() {
     ),
     tooltipTheme: TooltipThemeData(
       textStyle: TextStyle(
-        color: Color(0xFF383138),
+        color: Color(0xFFF2D3F2),
         fontSize: 12.0,
         fontFamily: "DepartureMono",
       ),
-      decoration: BoxDecoration(color: Color(0xFFF2D3F2), borderRadius: .zero),
+      decoration: BoxDecoration(color: Color(0xFF383138), borderRadius: .zero),
     ),
     fontFamily: 'DepartureMono',
     useMaterial3: true,

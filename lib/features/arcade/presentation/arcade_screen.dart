@@ -14,9 +14,10 @@ import 'package:arcade/features/arcade/presentation/rendering/arcade_world_paint
 import 'package:arcade/features/arcade/domain/grid_position.dart';
 import 'package:arcade/features/arcade/presentation/rendering/top_down_projection.dart';
 import 'package:arcade/features/arcade/domain/path_finder.dart';
+import 'package:arcade/features/arcade/presentation/station_dialog.dart';
+import 'package:arcade/shared/presentation/dialogs/app_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 
 class ArcadeScreen extends StatefulWidget {
   const ArcadeScreen({super.key});
@@ -166,14 +167,19 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     _startPathMovement();
   }
 
-  void _faceAndShowStation(ArcadeStation station) {
+  Future<void> _faceAndShowStation(ArcadeStation station) async {
     final currentWorld = _world;
     if (currentWorld == null) return;
 
     if (!currentWorld.facePosition(station.position)) return;
 
     setState(() {});
-    _showStationDialog(station);
+
+    await showAppDialog(
+      context: context,
+      barrierLabel: 'Settings',
+      widget: StationDialog(station: station),
+    );
   }
 
   void _completePendingStationInteraction() {
@@ -202,33 +208,6 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     if (dx + dy != 1) return;
 
     _faceAndShowStation(station);
-  }
-
-  void _showStationDialog(ArcadeStation station) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(station.label),
-          content: const Text('Ready to play this game?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text('Not now'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                context.go(station.routeName);
-              },
-              child: const Text('Play'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _handleTap(Offset position, Size size) {
@@ -443,11 +422,15 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     };
   }
 
-  void _tryInteract() {
+  Future<void> _tryInteract() async {
     final station = _stationInFrontOfPlayer();
     if (station == null) return;
 
-    _showStationDialog(station);
+    await showAppDialog(
+      context: context,
+      barrierLabel: 'Settings',
+      widget: StationDialog(station: station),
+    );
   }
 
   ArcadeStation? _stationInFrontOfPlayer() {
