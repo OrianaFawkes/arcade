@@ -16,8 +16,10 @@ import 'package:arcade/features/arcade/presentation/rendering/top_down_projectio
 import 'package:arcade/features/arcade/domain/path_finder.dart';
 import 'package:arcade/features/arcade/presentation/station_dialog.dart';
 import 'package:arcade/shared/presentation/dialogs/app_dialog.dart';
+import 'package:arcade/shared/presentation/widgets/pixel_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:smart_padding/smart_padding.dart';
 
 class ArcadeScreen extends StatefulWidget {
   const ArcadeScreen({super.key});
@@ -31,6 +33,8 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   late final ArcadeVisualConfig _visualConfig;
 
   late final AnimationController _cameraController;
+
+  late final FocusNode _worldFocusNode;
 
   late final ArcadeCamera _camera;
 
@@ -64,6 +68,9 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     )..addListener(_updateCamera);
     _cameraController.repeat();
 
+    _worldFocusNode = FocusNode(debugLabel: 'Arcade world');
+    _worldFocusNode.requestFocus();
+
     _camera = ArcadeCamera();
 
     _worldLoader = ArcadeWorldLoader();
@@ -76,6 +83,8 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   @override
   void dispose() {
     _cameraController.dispose();
+
+    _worldFocusNode.dispose();
 
     _movementRepeatStartTimer?.cancel();
     _movementRepeatTimer?.cancel();
@@ -476,44 +485,127 @@ class _ArcadeScreenState extends State<ArcadeScreen>
     return null;
   }
 
+  void _handleWorldFocusChange(bool hasFocus) {
+    if (hasFocus) return;
+
+    _heldKeys.clear();
+    _stopMovementRepeat();
+
+    if (!mounted) return;
+
+    setState(() {});
+  }
+
   @override
-  Widget build(_) {
+  Widget build(BuildContext context) {
     final currentWorld = _world;
 
     if (currentWorld == null) {
       return Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final viewportHeight = (screenHeight * 0.55).clamp(300.0, 600.0).toDouble();
+
     return Scaffold(
-      body: Focus(
-        autofocus: true,
-        onFocusChange: (hasFocus) {
-          if (!hasFocus) {
-            _heldKeys.clear();
+      appBar: AppBar(
+        title: Text('Arcade'),
+        actions: [
+          IconButton(
+            tooltip: 'Settings',
+            icon: Icon(Icons.settings_outlined),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: .stretch,
+            children: [
+              SmartPadding(
+                all: 16.0,
+                child: SizedBox(
+                  height: viewportHeight,
+                  child: Stack(
+                    children: [
+                      PixelCard(
+                        borderColor: Color(0xFFF2D3F2),
+                        fillColor: Color(0xFF36343D),
+                        padding: .all(2.0),
+                        radius: 4,
+                        child: Focus(
+                          focusNode: _worldFocusNode,
+                          canRequestFocus: true,
+                          onFocusChange: _handleWorldFocusChange,
+                          onKeyEvent: _handleKeyEvent,
+                          child: FutureBuilder<void>(
+                            future: ArcadeSpriteCache.instance.initialize(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError) {
+                                return const Center(
+                                  child: Text(
+                                    'Failed to initialize arcade sprites.',
+                                  ),
+                                );
+                              }
 
-            _stopMovementRepeat();
+                              if (snapshot.connectionState !=
+                                  ConnectionState.done) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
 
-            if (!mounted) return;
+                              return buildArcadeWorld(world: currentWorld);
+                            },
+                          ),
+                        ),
+                      ),
+                      IgnorePointer(
+                        child: PixelCard(
+                          borderColor: Color(0xFFF2D3F2),
+                          fillColor: Colors.transparent,
+                          padding: .zero,
+                          radius: 4,
+                          hasShadow: false,
+                          child: SizedBox.expand(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SmartPadding(all: 16.0, child: _buildKeyboardShortcuts()),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-            setState(() {});
-          }
-        },
-        onKeyEvent: _handleKeyEvent,
-        child: FutureBuilder<void>(
-          future: ArcadeSpriteCache.instance.initialize(),
-          builder: (_, snapshot) {
-            if (snapshot.hasError) {
-              return Center(
-                child: Text('Failed to initialize arcade sprites.'),
-              );
-            }
-
-            if (snapshot.connectionState != .done) {
-              return SizedBox.expand();
-            }
-
-            return buildArcadeWorld(world: currentWorld);
-          },
+  Widget _buildKeyboardShortcuts() {
+    return Card(
+      color: Colors.transparent,
+      child: SmartPadding(
+        all: 16.0,
+        child: Column(
+          crossAxisAlignment: .start,
+          children: [
+            Text('How to play', style: Theme.of(context).textTheme.titleMedium),
+            SizedBox(height: 12),
+            _ShortcutRow(
+              keys: 'W A S D / Arrows',
+              description: 'Move around the arcade',
+            ),
+            _ShortcutRow(keys: 'Click', description: 'Walk toward a location'),
+            _ShortcutRow(
+              keys: 'Enter',
+              description: 'Interact with a nearby cabinet',
+            ),
+            _ShortcutRow(keys: 'Escape', description: 'Release world controls'),
+          ],
         ),
       ),
     );
@@ -591,7 +683,10 @@ class _ArcadeScreenState extends State<ArcadeScreen>
 
         return GestureDetector(
           behavior: .opaque,
-          onTapDown: (details) => _handleTap(details.localPosition, size),
+          onTapDown: (details) {
+            _worldFocusNode.requestFocus();
+            _handleTap(details.localPosition, size);
+          },
           child: Stack(
             clipBehavior: .hardEdge,
             children: [
@@ -609,6 +704,28 @@ class _ArcadeScreenState extends State<ArcadeScreen>
           ),
         );
       },
+    );
+  }
+}
+
+class _ShortcutRow extends StatelessWidget {
+  final String keys;
+  final String description;
+
+  const _ShortcutRow({required this.keys, required this.description});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return SmartPadding(
+      vertical: 6.0,
+      child: Row(
+        children: [
+          SizedBox(width: 150, child: Text(keys, style: textTheme.bodyMedium)),
+          Expanded(child: Text(description)),
+        ],
+      ),
     );
   }
 }

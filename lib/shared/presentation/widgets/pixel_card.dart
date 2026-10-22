@@ -13,6 +13,8 @@ class PixelCard extends StatelessWidget {
 
   final int radius;
 
+  final bool hasShadow;
+
   const PixelCard({
     super.key,
     required this.child,
@@ -21,6 +23,7 @@ class PixelCard extends StatelessWidget {
     this.padding = const .all(8.0),
     this.offset = const Offset(0.0, 4.0),
     this.radius = 4,
+    this.hasShadow = true,
   });
 
   @override
@@ -35,15 +38,19 @@ class PixelCard extends StatelessWidget {
 
     return Stack(
       children: [
-        Positioned.fill(
-          child: Transform.translate(
-            offset: offset,
-            child: Opacity(
-              opacity: 0.5,
-              child: RepaintBoundary(child: CustomPaint(painter: shadowPanel)),
+        if (hasShadow) ...[
+          Positioned.fill(
+            child: Transform.translate(
+              offset: offset,
+              child: Opacity(
+                opacity: 0.5,
+                child: RepaintBoundary(
+                  child: CustomPaint(painter: shadowPanel),
+                ),
+              ),
             ),
           ),
-        ),
+        ],
         Positioned.fill(
           child: RepaintBoundary(child: CustomPaint(painter: cardPanel)),
         ),

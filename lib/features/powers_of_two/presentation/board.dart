@@ -122,6 +122,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
       fillColor: Color(0xFF36343D).withValues(alpha: 0.8),
       padding: .zero,
       radius: 6,
+      hasShadow: false,
       child: Center(
         child: Column(
           mainAxisSize: .min,
@@ -176,6 +177,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
       fillColor: Color(0xFF36343D).withValues(alpha: 0.8),
       padding: .zero,
       radius: 6,
+      hasShadow: false,
       child: Center(
         child: Column(
           mainAxisSize: .min,
