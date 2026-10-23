@@ -1,3 +1,4 @@
+import 'package:arcade/app/analytics/analytics_consent_banner.dart';
 import 'package:arcade/app/router.dart';
 import 'package:flutter/material.dart';
 import 'package:arcade/app/theme.dart';
@@ -16,6 +17,9 @@ class MyApp extends StatelessWidget {
       title: 'Arcade',
       theme: theme,
       debugShowCheckedModeBanner: false,
+      builder: (_, child) {
+        return AnalyticsConsentBanner(child: child ?? SizedBox.shrink());
+      },
     );
   }
 }

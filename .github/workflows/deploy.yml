@@ -30,7 +30,11 @@ jobs:
         run: flutter analyze
 
       - name: Build web
-        run: flutter build web --release --wasm --base-href /
+        run: >
+          flutter build web --release --wasm --base-href /
+          --dart-define=ARCADE_ANALYTICS_ENABLED=true
+          --dart-define=GA_MEASUREMENT_ID=${{ vars.GA_MEASUREMENT_ID }}
+          --dart-define=ARCADE_ANALYTICS_ALLOWED_HOSTS=${{ vars.ARCADE_ANALYTICS_ALLOWED_HOSTS }}
 
       - name: Add GitHub Pages SPA fallback
         run: cp build/web/index.html build/web/404.html

@@ -1,4 +1,5 @@
 import 'package:arcade/app/screens/not_found_screen.dart';
+import 'package:arcade/app/screens/privacy_screen.dart';
 import 'package:arcade/features/powers_of_two/presentation/powers_of_two_screen.dart';
 import 'package:arcade/features/arcade/presentation/arcade_screen.dart';
 import 'package:arcade/features/proximity/presentation/proximity_screen.dart';
@@ -18,6 +19,10 @@ GoRouter createRouter() {
       GoRoute(
         path: '/proximity',
         pageBuilder: (_, _) => NoTransitionPage(child: ProximityScreen()),
+      ),
+      GoRoute(
+        path: '/privacy',
+        pageBuilder: (_, _) => NoTransitionPage(child: PrivacyScreen()),
       ),
     ],
     errorBuilder: (_, _) => NotFoundScreen(),
