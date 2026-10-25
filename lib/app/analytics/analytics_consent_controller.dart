@@ -32,7 +32,8 @@ class AnalyticsConsentController extends ChangeNotifier {
 
   SharedPreferences? _preferences;
 
-  AnalyticsConsentChoice _choice = AnalyticsConsentChoice.undecided;
+  AnalyticsConsentChoice _choice = .undecided;
+  
   bool _bridgeEnabled = false;
   bool _initialized = false;
 

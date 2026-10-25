@@ -77,14 +77,11 @@ class PrivacyScreen extends StatelessWidget {
             builder: (context, _) {
               final controller = analyticsConsentController;
 
-              final status = !controller.analyticsAvailableHere
-                  ? 'Analytics is not active in this domain.'
-                  : switch (controller.choice) {
-                      .accepted => 'You have allowed analytics.',
-                      .rejected => 'You have rejected analytics.',
-                      .undecided =>
-                        'You have not made an analytics choice yet.',
-                    };
+              final status = switch (controller.choice) {
+                .accepted => 'You have allowed analytics.',
+                .rejected => 'You have rejected analytics.',
+                .undecided => 'You have not made an analytics choice yet.',
+              };
 
               return Column(
                 mainAxisSize: .min,
