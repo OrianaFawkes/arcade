@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:smart_padding/smart_padding.dart';
+import 'dart:ui_web' as ui_web;
 
+import 'package:arcade/shared/presentation/widgets/dialog_container.dart';
+import 'package:arcade/shared/presentation/widgets/pixel_button.dart';
+import 'package:flutter/material.dart';
+import 'package:smart_padding/smart_padding.dart';
 import 'analytics_consent_controller.dart';
 
 class AnalyticsConsentBanner extends StatelessWidget {
@@ -14,6 +16,8 @@ class AnalyticsConsentBanner extends StatelessWidget {
     return AnimatedBuilder(
       animation: analyticsConsentController,
       builder: (context, _) {
+        final browser = ui_web.BrowserDetection.instance;
+
         final controller = analyticsConsentController;
 
         final shouldShow =
@@ -23,68 +27,17 @@ class AnalyticsConsentBanner extends StatelessWidget {
         return Stack(
           fit: .expand,
           children: [
-            child,
+            AbsorbPointer(absorbing: shouldShow, child: child),
             if (shouldShow) ...[
-              Align(
-                alignment: .bottomCenter,
+              Positioned(
+                left: browser.isMobile ? 0 : null,
+                top: browser.isMobile ? 0 : null,
+                right: browser.isMobile ? 0 : null,
+                bottom: 0,
                 child: SafeArea(
-                  minimum: .all(16.0),
-                  child: Center(
-                    heightFactor: 1,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: 280),
-                      child: Material(
-                        elevation: 8,
-                        borderRadius: .circular(16.0),
-                        clipBehavior: .antiAlias,
-                        child: SmartPadding(
-                          all: 24.0,
-                          child: Column(
-                            mainAxisSize: .min,
-                            crossAxisAlignment: .start,
-                            spacing: 8.0,
-                            children: [
-                              Text(
-                                'A little analytics, by choice.',
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              Text(
-                                'Optional Google Analytics helps us '
-                                'understand visits to Arcade and which '
-                                'pages people use. It stays off unless '
-                                'you choose to allow it.',
-                              ),
-                              TextButton(
-                                onPressed: () => context.push('/privacy'),
-                                child: const Text('Read the privacy notice'),
-                              ),
-                              Wrap(
-                                spacing: 8.0,
-                                runSpacing: 8.0,
-                                children: [
-                                  OutlinedButton(
-                                    onPressed: () {
-                                      analyticsConsentController.setChoice(
-                                        .rejected,
-                                      );
-                                    },
-                                    child: Text('Reject analytics'),
-                                  ),
-                                  FilledButton(
-                                    onPressed: () {
-                                      analyticsConsentController.setChoice(
-                                        .accepted,
-                                      );
-                                    },
-                                    child: Text('Allow analytics'),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: SmartPadding(all: 24.0, child: _ConsentDialog()),
                   ),
                 ),
               ),
@@ -92,6 +45,55 @@ class AnalyticsConsentBanner extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _ConsentDialog extends StatelessWidget {
+  const _ConsentDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return DialogContainer(
+      width: 320.0,
+      child: Column(
+        mainAxisSize: .min,
+        crossAxisAlignment: .start,
+        spacing: 16.0,
+        children: [
+          Text(
+            'Welcome to the arcade!\nMind the dust.',
+            style: textTheme.titleMedium,
+          ),
+          Text(
+            "Hi, I'm Ori! I use optional Google Analytics to get a rough "
+            'idea of which rooms get visited. It stays inactive until '
+            'you say otherwise.',
+            style: textTheme.bodyMedium,
+          ),
+          PixelButton(
+            height: 36.0,
+            fillColor: Color(0xFF36343D),
+            borderColor: Color(0xFFF2D3F2),
+            onPressed: () {
+              analyticsConsentController.setChoice(.rejected);
+            },
+            child: Text('Reject analytics', style: textTheme.bodyLarge),
+          ),
+          PixelButton(
+            height: 36.0,
+            onPressed: () {
+              analyticsConsentController.setChoice(.accepted);
+            },
+            child: Text(
+              'Allow analytics',
+              style: textTheme.bodyLarge?.copyWith(color: Color(0xFF383138)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

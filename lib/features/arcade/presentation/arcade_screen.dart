@@ -19,6 +19,7 @@ import 'package:arcade/shared/presentation/dialogs/app_dialog.dart';
 import 'package:arcade/shared/presentation/widgets/pixel_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:smart_padding/smart_padding.dart';
 
 class ArcadeScreen extends StatefulWidget {
@@ -512,9 +513,11 @@ class _ArcadeScreenState extends State<ArcadeScreen>
         title: Text('Arcade'),
         actions: [
           IconButton(
-            tooltip: 'Settings',
-            icon: Icon(Icons.settings_outlined),
-            onPressed: () {},
+            tooltip: 'Privacy',
+            icon: Icon(Icons.privacy_tip, color: Color(0xFFF2D3F2)),
+            onPressed: () {
+              context.go('/privacy');
+            },
           ),
         ],
       ),

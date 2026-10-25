@@ -43,6 +43,9 @@ class AnalyticsConsentController extends ChangeNotifier {
 
     if (!_measurementId.startsWith('G-')) return false;
 
+    final path = Uri.base.path.replaceFirst(RegExp(r'/+$'), '');
+    if (path == '/privacy') return false;
+
     final allowedHosts = _allowedHostsCsv
         .split(',')
         .map((host) => host.trim().toLowerCase())
@@ -72,7 +75,7 @@ class AnalyticsConsentController extends ChangeNotifier {
       }
     } catch (_) {
       // Fail closed: if consent cannot be read, do not enable analytics.
-      _choice = AnalyticsConsentChoice.undecided;
+      _choice = .undecided;
       _bridgeEnabled = false;
       _initialized = true;
     }
