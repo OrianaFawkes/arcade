@@ -23,13 +23,15 @@ class _DifficultyDialogState extends State<DifficultyDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    
     return DialogContainer(
       width: 280.0,
       child: Column(
         mainAxisSize: .min,
         spacing: 16.0,
         children: [
-          Text('Difficulty', style: Theme.of(context).textTheme.titleLarge),
+          Text('Difficulty', style: textTheme.titleLarge),
           for (final difficulty in Difficulty.values)
             SimpleDialogOption(
               onPressed: () async {

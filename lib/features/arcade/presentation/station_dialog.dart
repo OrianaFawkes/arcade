@@ -11,35 +11,28 @@ class StationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return DialogContainer(
       width: 280.0,
       child: Column(
         mainAxisSize: .min,
         spacing: 16.0,
         children: [
-          Text(
-            station.label,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          Text(
-            'Ready to play this game?',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          Text(station.label, style: textTheme.titleLarge),
+          Text('Ready to play this game?', style: textTheme.bodyMedium),
           Row(
             spacing: 8.0,
             children: [
               Expanded(
                 child: PixelButton(
                   height: 36.0,
-                  fillColor: Color(0xFF383138),
+                  fillColor: Color(0xFF36343D),
                   borderColor: Color(0xFFF2D3F2),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text(
-                    'Not now',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
+                  child: Text('Not now', style: textTheme.bodyLarge),
                 ),
               ),
               Expanded(
@@ -51,9 +44,9 @@ class StationDialog extends StatelessWidget {
                   },
                   child: Text(
                     'Play',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyLarge?.copyWith(color: Color(0xFF383138)),
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: Color(0xFF383138),
+                    ),
                   ),
                 ),
               ),

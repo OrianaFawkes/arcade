@@ -16,13 +16,15 @@ class SettingsDialog extends StatefulWidget {
 class _SettingsDialogState extends State<SettingsDialog> {
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return DialogContainer(
       width: 280.0,
       child: Column(
         mainAxisSize: .min,
         spacing: 16.0,
         children: [
-          Text('Tile Color', style: Theme.of(context).textTheme.titleLarge),
+          Text('Tile Color', style: textTheme.titleLarge),
           Wrap(
             spacing: 16.0,
             runSpacing: 16.0,
@@ -55,7 +57,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 ),
             ],
           ),
-          Text('Board Jiggle', style: Theme.of(context).textTheme.titleLarge),
+          Text('Board Jiggle', style: textTheme.titleLarge),
           // TODO: Pixel-ify
           Switch(
             value: widget.game.hasBoardJiggle,

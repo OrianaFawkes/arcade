@@ -142,7 +142,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
                       onPressed: widget.onContinue,
                       child: Text(
                         'Continue',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        style: textTheme.bodyLarge?.copyWith(
                           color: Color(0xFF383138),
                         ),
                       ),
@@ -154,7 +154,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
                       onPressed: widget.onRestart,
                       child: Text(
                         'Restart',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        style: textTheme.bodyLarge?.copyWith(
                           color: Color(0xFF383138),
                         ),
                       ),
@@ -193,9 +193,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
                 onPressed: widget.onRestart,
                 child: Text(
                   'Restart',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: Color(0xFF383138)),
+                  style: textTheme.bodyLarge?.copyWith(color: Color(0xFF383138)),
                 ),
               ),
             ),

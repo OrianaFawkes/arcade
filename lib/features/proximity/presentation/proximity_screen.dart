@@ -139,6 +139,8 @@ class _ProximityScreenState extends State<ProximityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     final localGame = game;
 
     if (localGame == null) {
@@ -189,10 +191,10 @@ class _ProximityScreenState extends State<ProximityScreen> {
           mainAxisSize: MainAxisSize.min,
           spacing: 16.0,
           children: [
-            Text(_statusText(), style: Theme.of(context).textTheme.titleMedium),
+            Text(_statusText(), style: textTheme.titleMedium),
             Text(
               _difficultyLabel(localGame.difficulty),
-              style: Theme.of(context).textTheme.bodySmall,
+              style: textTheme.bodySmall,
             ),
             Board(
               board: localGame.board,
@@ -202,7 +204,7 @@ class _ProximityScreenState extends State<ProximityScreen> {
             ),
             Text(
               'Best: ${localGame.bestTime == null ? '--:--' : _formatDuration(localGame.bestTime!)}',
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: textTheme.bodyMedium,
             ),
           ],
         ),

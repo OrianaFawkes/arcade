@@ -586,6 +586,8 @@ class _ArcadeScreenState extends State<ArcadeScreen>
   }
 
   Widget _buildKeyboardShortcuts() {
+    final textTheme = Theme.of(context).textTheme;
+
     return Card(
       color: Colors.transparent,
       child: SmartPadding(
@@ -593,7 +595,7 @@ class _ArcadeScreenState extends State<ArcadeScreen>
         child: Column(
           crossAxisAlignment: .start,
           children: [
-            Text('How to play', style: Theme.of(context).textTheme.titleMedium),
+            Text('How to play', style: textTheme.titleMedium),
             SizedBox(height: 12),
             _ShortcutRow(
               keys: 'W A S D / Arrows',
