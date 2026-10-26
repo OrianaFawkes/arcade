@@ -6,54 +6,22 @@ class ArcadeSpriteRegistry {
   ArcadeSpriteRegistry._();
 
   static const Map<String, PixelMatrix> sprites = {
-    'floor': [
-      [0],
-    ],
-    'floor_end_north': [
-      [0],
-    ],
-    'floor_end_east': [
-      [0],
-    ],
-    'floor_end_south': [
-      [0],
-    ],
-    'floor_end_west': [
-      [0],
-    ],
-    'floor_end_north_east': [
-      [0],
-    ],
-    'floor_end_north_south': [
-      [0],
-    ],
-    'floor_end_north_west': [
-      [0],
-    ],
-    'floor_end_east_south': [
-      [0],
-    ],
-    'floor_end_east_west': [
-      [0],
-    ],
-    'floor_end_south_west': [
-      [0],
-    ],
-    'floor_end_north_east_south': [
-      [0],
-    ],
-    'floor_end_north_east_west': [
-      [0],
-    ],
-    'floor_end_north_south_west': [
-      [0],
-    ],
-    'floor_end_east_south_west': [
-      [0],
-    ],
-    'floor_end_north_east_south_west': [
-      [0],
-    ],
+    'floor': floorPixels,
+    'floor_end_north': floorEndNorthPixels,
+    'floor_end_east': floorEndEastPixels,
+    'floor_end_south': floorEndSouthPixels,
+    'floor_end_west': floorEndWestPixels,
+    'floor_end_north_east': floorEndNorthEastPixels,
+    'floor_end_north_south': floorEndNorthSouthPixels,
+    'floor_end_north_west': floorEndNorthWestPixels,
+    'floor_end_east_south': floorEndEastSouthPixels,
+    'floor_end_east_west': floorEndEastWestPixels,
+    'floor_end_south_west': floorEndSouthWestPixels,
+    'floor_end_north_east_south': floorEndNorthEastSouthPixels,
+    'floor_end_north_east_west': floorEndNorthEastWestPixels,
+    'floor_end_north_south_west': floorEndNorthSouthWestPixels,
+    'floor_end_east_south_west': floorEndEastSouthWestPixels,
+    'floor_end_north_east_south_west': floorEndNorthEastSouthWestPixels,
     'wall': wallPixels,
     'wall_end_north': wallEndNorthPixels,
     'wall_end_east': wallEndEastPixels,
