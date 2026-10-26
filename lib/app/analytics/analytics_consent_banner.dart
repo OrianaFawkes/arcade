@@ -22,6 +22,7 @@ class AnalyticsConsentBanner extends StatelessWidget {
 
         final shouldShow =
             controller.analyticsAvailableHere &&
+            !controller.isPrivacyPage &&
             controller.choice == .undecided;
 
         return Stack(

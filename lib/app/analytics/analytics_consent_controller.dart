@@ -33,7 +33,7 @@ class AnalyticsConsentController extends ChangeNotifier {
   SharedPreferences? _preferences;
 
   AnalyticsConsentChoice _choice = .undecided;
-  
+
   bool _bridgeEnabled = false;
   bool _initialized = false;
 
@@ -44,15 +44,19 @@ class AnalyticsConsentController extends ChangeNotifier {
 
     if (!_measurementId.startsWith('G-')) return false;
 
-    final path = Uri.base.path.replaceFirst(RegExp(r'/+$'), '');
-    if (path == '/privacy') return false;
-
     final allowedHosts = _allowedHostsCsv
         .split(',')
         .map((host) => host.trim().toLowerCase())
         .where((host) => host.isNotEmpty);
 
     return allowedHosts.contains(Uri.base.host.toLowerCase());
+  }
+
+  bool get isPrivacyPage {
+    final path = Uri.base.path.replaceFirst(RegExp(r'/+$'), '');
+    if (path == '/privacy') return true;
+
+    return false;
   }
 
   Future<void> initialize() async {
