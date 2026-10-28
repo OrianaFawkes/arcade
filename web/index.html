@@ -1,40 +1,58 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
+<html lang="en">
+  <head>
+    <base href="$FLUTTER_BASE_HREF">
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
+    <meta charset="UTF-8">
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+    <meta name="description" content="Mom Said It's My Turn to Feed the Algorithm">
 
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+    <meta property="og:title" content="Arcade" />
+    <meta
+      property="og:description"
+      content="Mom Said It's My Turn to Feed the Algorithm"
+    />
+<!--    <meta-->
+<!--      property="og:image"-->
+<!--      content="https://arcade.emptyspaces.dev/og-image.png"-->
+<!--    />-->
+    <meta property="og:url" content="https://arcade.emptyspaces.dev/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Arcade" />
+    <meta property="og:locale" content="en_US" />
 
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
+    <!-- iOS meta tags & icons -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Arcade">
+    <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Mom Said It's My Turn to Feed the Algorithm">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="arcade">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <title>Arcade</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="loader/loader.css" />
+    <link
+      rel="preload"
+      href="assets/fonts/DepartureMono/DepartureMono-Regular.otf"
+      as="font"
+      type="font/otf"
+      crossorigin
+    />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+    <script src="analytics_bridge.js"></script>
+  </head>
+  <body>
+    <div id="loading">
+      <img src="assets/images/arcade_icon.png" alt="Arcade logo" />
+      <p id="loading-text">Initializing...</p>
+      <div id="progress-bar">
+        <div id="progress"></div>
+      </div>
+    </div>
 
-  <title>Arcade</title>
-  <link rel="manifest" href="manifest.json">
-
-  <script src="analytics_bridge.js"></script>
-</head>
-<body>
-  <script src="flutter_bootstrap.js" async></script>
-</body>
+    <script src="loader/loader.js"></script>
+    <script src="flutter_bootstrap.js" defer></script>
+  </body>
 </html>

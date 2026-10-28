@@ -15,5 +15,5 @@ class ArcadeVisualConfig {
   double get playerBounceHeight => px(2);
 
   double get wallHeight => px(70);
-  double get stationHeight => px(60);
+  double get stationHeight => px(70);
 }

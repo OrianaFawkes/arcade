@@ -1,7 +1,8 @@
 {
-    "name": "arcade",
-    "short_name": "arcade",
-    "start_url": ".",
+    "name": "Arcade",
+    "short_name": "Arcade",
+    "start_url": "/",
+    "display_override": ["standalone", "browser"],
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
