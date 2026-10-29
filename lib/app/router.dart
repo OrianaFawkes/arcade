@@ -11,7 +11,13 @@ GoRouter createRouter() {
     routes: [
       GoRoute(
         path: '/',
-        pageBuilder: (_, _) => NoTransitionPage(child: ArcadeScreen()),
+        pageBuilder: (_, _) => NoTransitionPage(
+          child: Title(
+            title: 'Arcade',
+            color: Color(0xFF000000),
+            child: ArcadeScreen(),
+          ),
+        ),
       ),
       GoRoute(
         path: '/powers-of-two',
