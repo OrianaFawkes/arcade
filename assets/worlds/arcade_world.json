@@ -1,36 +1,91 @@
 {
   "version": 1,
   "spawn": {
-    "x": 5,
-    "y": 7
+    "x": 8,
+    "y": 3
   },
   "terrain": [
-    "..................",
-    "..................",
-    "..##########......",
-    "..#FFFFFFFF#####..",
-    "..#FFFFFFFFFFFF#..",
-    "..#FFFFFFFFFFFF#..",
-    "....FFFFFFFFFFF#..",
-    ".....F............",
-    "..................",
-    "..................",
-    ".................."
-  ],
+  "..#############..",
+  "..#FFF#FFF#FFF#..",
+  "..#FFFFFFFFFFF#..",
+  "..#FFFFFFFFFFF#..",
+  "..#####FFF#####..",
+  "......#FFF#......",
+  ".######FFF######.",
+  ".#FFFFFFFFFFFFF#.",
+  ".#FFFFFFFFFFFFF#."
+],
   "stations": [
+    {
+      "id": "out_of_order_1",
+      "label": "Out of Order",
+      "x": 2,
+      "y": 7,
+      "routeName": "/"
+    },
+    {
+      "id": "out_of_order_2",
+      "label": "Out of Order",
+      "x": 3,
+      "y": 7,
+      "routeName": "/"
+    },
+    {
+      "id": "out_of_order_3",
+      "label": "Out of Order",
+      "x": 4,
+      "y": 7,
+      "routeName": "/"
+    },
+    {
+      "id": "out_of_order_4",
+      "label": "Out of Order",
+      "x": 5,
+      "y": 7,
+      "routeName": "/"
+    },
     {
       "id": "proximity",
       "label": "Proximity",
-      "x": 9,
-      "y": 3,
+      "x": 6,
+      "y": 7,
       "routeName": "/proximity"
     },
     {
-      "id": "powers-of-two",
+      "id": "powers_of_two",
       "label": "Powers of Two",
       "x": 10,
-      "y": 3,
-      "routeName": "/powers-of-two"
+      "y": 7,
+
+      "routeName": "/powers_of_two"
+    },
+    {
+      "id": "out_of_order_5",
+      "label": "Out of Order",
+      "x": 11,
+      "y": 7,
+      "routeName": "/"
+    },
+    {
+      "id": "out_of_order_6",
+      "label": "Out of Order",
+      "x": 12,
+      "y": 7,
+      "routeName": "/"
+    },
+    {
+      "id": "out_of_order_7",
+      "label": "Out of Order",
+      "x": 13,
+      "y": 7,
+      "routeName": "/"
+    },
+    {
+      "id": "out_of_order_8",
+      "label": "Out of Order",
+      "x": 14,
+      "y": 7,
+      "routeName": "/"
     }
   ]
 }
