@@ -20,38 +20,56 @@ class StationDialog extends StatelessWidget {
         spacing: 16.0,
         children: [
           Text(station.label, style: textTheme.titleLarge),
-          Text('Ready to play this game?', style: textTheme.bodyMedium),
-          Row(
-            spacing: 8.0,
-            children: [
-              Expanded(
-                child: PixelButton(
-                  height: 36.0,
-                  fillColor: Color(0xFF36343D),
-                  borderColor: Color(0xFFF2D3F2),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Not now', style: textTheme.bodyLarge),
-                ),
+          // TODO: improve band-aid solution
+          if (station.id.contains('out_of_order')) ...[
+            Text(
+              'This feature is currently out of order. Please try again later.',
+              style: textTheme.bodyMedium,
+            ),
+            PixelButton(
+              height: 36.0,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'Nevermind',
+                style: textTheme.bodyLarge?.copyWith(color: Color(0xFF383138)),
               ),
-              Expanded(
-                child: PixelButton(
-                  height: 36.0,
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    context.go(station.routeName);
-                  },
-                  child: Text(
-                    'Play',
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: Color(0xFF383138),
+            ),
+          ] else ...[
+            Text('Ready to play this game?', style: textTheme.bodyMedium),
+            Row(
+              spacing: 8.0,
+              children: [
+                Expanded(
+                  child: PixelButton(
+                    height: 36.0,
+                    fillColor: Color(0xFF36343D),
+                    borderColor: Color(0xFFF2D3F2),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Not now', style: textTheme.bodyLarge),
+                  ),
+                ),
+                Expanded(
+                  child: PixelButton(
+                    height: 36.0,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      context.go(station.routeName);
+                    },
+                    child: Text(
+                      'Play',
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: Color(0xFF383138),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
       ),
     );
