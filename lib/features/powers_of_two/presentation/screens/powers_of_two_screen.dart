@@ -1,7 +1,10 @@
-import 'package:arcade/features/powers_of_two/presentation/board.dart';
+import 'package:arcade/features/powers_of_two/presentation/widgets/board.dart';
 import 'package:arcade/features/powers_of_two/game/game_storage.dart';
-import 'package:arcade/features/powers_of_two/presentation/settings_dialog.dart';
+import 'package:arcade/features/powers_of_two/presentation/dialogs/settings_dialog.dart';
 import 'package:arcade/features/powers_of_two/presentation/tile_color_scheme.dart';
+import 'package:arcade/features/powers_of_two/presentation/widgets/pot_actions.dart';
+import 'package:arcade/features/powers_of_two/presentation/widgets/pot_shortcuts.dart';
+import 'package:arcade/features/powers_of_two/presentation/widgets/pot_scoreboard.dart';
 import 'package:arcade/shared/presentation/dialogs/app_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +12,7 @@ import 'package:arcade/features/powers_of_two/game/game_controller.dart';
 import 'package:arcade/features/powers_of_two/models/move_direction.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_padding/smart_padding.dart';
 
 class PowersOfTwoScreen extends StatefulWidget {
   const PowersOfTwoScreen({super.key});
@@ -87,6 +91,12 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
     if (HardwareKeyboard.instance.isControlPressed) return .ignored;
     if (HardwareKeyboard.instance.isMetaPressed) return .ignored;
 
+    if (event.logicalKey == .keyQ) {
+      _showSettings();
+
+      return .handled;
+    }
+
     if (event.logicalKey == .keyR) {
       _restart();
 
@@ -163,16 +173,20 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
 
     if (velocity.dx.abs() > velocity.dy.abs()) {
       if (velocity.dx > 0) {
-        _move(MoveDirection.right);
-      } else {
-        _move(MoveDirection.left);
+        _move(.right);
+
+        return;
       }
+
+      _move(.left);
     } else {
       if (velocity.dy > 0) {
-        _move(MoveDirection.down);
-      } else {
-        _move(MoveDirection.up);
+        _move(.down);
+
+        return;
       }
+
+      _move(.up);
     }
   }
 
@@ -191,10 +205,8 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
   }
 
   @override
-  Widget build(_) {
-    if (game == null) {
-      return Center(child: CircularProgressIndicator());
-    }
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
 
     return Focus(
       focusNode: _focusNode,
@@ -208,46 +220,55 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
               icon: Icon(Icons.arrow_back),
               onPressed: () => context.go('/'),
             ),
-            title: Text('Powers of Two'),
-            actions: [
-              Padding(
-                padding: .symmetric(horizontal: 8.0),
-                child: Center(child: Text('Score: ${game!.score}')),
-              ),
-              Padding(
-                padding: .symmetric(horizontal: 8.0),
-                child: Center(child: Text('Best: ${game!.highScore}')),
-              ),
-              IconButton(
-                onPressed: _showSettings,
-                icon: Icon(Icons.settings_rounded, color: Color(0xFFF2D3F2)),
-                tooltip: 'Settings',
-              ),
-              IconButton(
-                onPressed: game!.canUndo ? _undo : null,
-                icon: Icon(Icons.undo_rounded, color: Color(0xFFF2D3F2)),
-                tooltip: 'Undo (Z)',
-              ),
-              IconButton(
-                onPressed: _restart,
-                icon: Icon(Icons.refresh_rounded, color: Color(0xFFF2D3F2)),
-                tooltip: 'Restart (R)',
-              ),
-            ],
+            title: Text(
+              'Powers of Two',
+              style: textTheme.bodyLarge,
+              overflow: .ellipsis,
+              maxLines: 1,
+            ),
+            titleSpacing: 0.0,
           ),
-          body: Center(
-            child: Board(
-              tiles: game!.tiles,
-              lastMove: _lastMove,
-              colorScheme: TileColorScheme.presets.firstWhere(
-                (e) => e.baseColor == game!.tileBaseColor,
+          body: SafeArea(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: .center,
+                spacing: 16.0,
+                children: [
+                  if (game == null) ...[
+                    CircularProgressIndicator(),
+                  ] else ...[
+                    SmartPadding(
+                      horizontal: 24.0,
+                      child: PotActions(
+                        onShowSettings: _showSettings,
+                        onUndo: game!.canUndo ? _undo : null,
+                        onRestart: _restart,
+                      ),
+                    ),
+                    SmartPadding(
+                      horizontal: 24.0,
+                      child: PotScoreboard(
+                        score: game!.score,
+                        best: game!.highScore,
+                      ),
+                    ),
+                    Board(
+                      tiles: game!.tiles,
+                      lastMove: _lastMove,
+                      colorScheme: TileColorScheme.presets.firstWhere(
+                        (e) => e.baseColor == game!.tileBaseColor,
+                      ),
+                      showWinOverlay: _showWinOverlay,
+                      isGameOver: game!.isGameOver,
+                      hasBoardJiggle: game!.hasBoardJiggle,
+                      score: game!.score,
+                      onRestart: _restart,
+                      onContinue: _continueGame,
+                    ),
+                    SmartPadding(horizontal: 24.0, child: PotShortcuts()),
+                  ],
+                ],
               ),
-              showWinOverlay: _showWinOverlay,
-              isGameOver: game!.isGameOver,
-              hasBoardJiggle: game!.hasBoardJiggle,
-              score: game!.score,
-              onRestart: _restart,
-              onContinue: _continueGame,
             ),
           ),
         ),

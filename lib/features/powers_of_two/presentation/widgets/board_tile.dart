@@ -3,18 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:arcade/features/powers_of_two/models/tile.dart';
 import 'package:arcade/shared/presentation/widgets/pixel_card.dart';
 
-class TileWidget extends StatefulWidget {
+class BoardTile extends StatefulWidget {
   final Tile tile;
 
   final TileColorScheme colorScheme;
 
-  const TileWidget({super.key, required this.tile, required this.colorScheme});
+  const BoardTile({super.key, required this.tile, required this.colorScheme});
 
   @override
-  State<TileWidget> createState() => _TileWidgetState();
+  State<BoardTile> createState() => _BoardTileState();
 }
 
-class _TileWidgetState extends State<TileWidget>
+class _BoardTileState extends State<BoardTile>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
@@ -43,7 +43,7 @@ class _TileWidgetState extends State<TileWidget>
   }
 
   @override
-  void didUpdateWidget(covariant TileWidget oldWidget) {
+  void didUpdateWidget(covariant BoardTile oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.tile.value != _previousValue) {
@@ -67,22 +67,24 @@ class _TileWidgetState extends State<TileWidget>
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    final fillColor = widget.colorScheme.fillColor(widget.tile.value);
-    final borderColor = widget.colorScheme.borderColor(widget.tile.value);
-    final textColor = widget.colorScheme.textColor(widget.tile.value);
+    final tileValue = widget.tile.value;
+    final colorScheme = widget.colorScheme;
 
     return ScaleTransition(
       scale: _scaleAnimation,
       child: PixelCard(
-        borderColor: borderColor,
-        fillColor: fillColor,
+        borderColor: colorScheme.borderColor(tileValue),
+        fillColor: colorScheme.fillColor(tileValue),
         offset: .zero,
         child: Center(
           child: Text(
-            '${widget.tile.value}',
-            style: textTheme.titleLarge?.copyWith(color: textColor),
+            '$tileValue',
+            style: textTheme.titleLarge?.copyWith(
+              color: colorScheme.textColor(tileValue),
+            ),
+            textAlign: .center,
             overflow: .ellipsis,
-            maxLines: 2,
+            maxLines: 1,
           ),
         ),
       ),

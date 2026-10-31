@@ -17,7 +17,7 @@ class ArcadeScreen extends StatefulWidget {
 class _ArcadeScreenState extends State<ArcadeScreen>
     with SingleTickerProviderStateMixin {
   @override
-  Widget build(BuildContext context) {
+  Widget build(_) {
     final browser = ui_web.BrowserDetection.instance;
 
     return Scaffold(

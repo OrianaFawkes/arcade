@@ -1,5 +1,5 @@
 import 'package:arcade/features/powers_of_two/presentation/tile_color_scheme.dart';
-import 'package:arcade/features/powers_of_two/presentation/tile_widget.dart';
+import 'package:arcade/features/powers_of_two/presentation/widgets/board_tile.dart';
 import 'package:arcade/shared/presentation/widgets/pixel_button.dart';
 import 'package:flutter/material.dart';
 import 'package:arcade/features/powers_of_two/game/game_controller.dart';
@@ -193,7 +193,9 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
                 onPressed: widget.onRestart,
                 child: Text(
                   'Restart',
-                  style: textTheme.bodyLarge?.copyWith(color: Color(0xFF383138)),
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: Color(0xFF383138),
+                  ),
                 ),
               ),
             ),
@@ -260,7 +262,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
                       top: gap + tile.row * (cellSize + gap),
                       width: cellSize,
                       height: cellSize,
-                      child: TileWidget(
+                      child: BoardTile(
                         tile: tile,
                         colorScheme: widget.colorScheme,
                       ),
