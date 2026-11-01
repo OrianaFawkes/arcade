@@ -22,8 +22,6 @@ class PowersOfTwoScreen extends StatefulWidget {
 }
 
 class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
-  final FocusNode _focusNode = FocusNode();
-
   GameController? game;
 
   MoveDirection? _lastMove;
@@ -51,16 +49,7 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
 
         _showWinOverlay = localGame.hasWon && !localGame.hasShownWin;
       });
-
-      _focusNode.requestFocus();
     });
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-
-    super.dispose();
   }
 
   Future<void> _move(MoveDirection direction) async {
@@ -134,8 +123,6 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
 
       _lastMove = null;
     });
-
-    _focusNode.requestFocus();
   }
 
   Future<void> _undo() async {
@@ -148,8 +135,6 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
     if (!mounted || !didUndo) return;
 
     setState(() => _lastMove = null);
-
-    _focusNode.requestFocus();
   }
 
   Future<void> _continueGame() async {
@@ -160,8 +145,6 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
     if (!mounted) return;
 
     setState(() => _showWinOverlay = false);
-
-    _focusNode.requestFocus();
   }
 
   void _handleSwipe(DragEndDetails details) {
@@ -209,7 +192,7 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Focus(
-      focusNode: _focusNode,
+      autofocus: true,
       onKeyEvent: (_, event) => _handleKey(event),
       child: GestureDetector(
         onHorizontalDragEnd: _handleSwipe,
@@ -244,10 +227,7 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
                         onUndo: game!.canUndo ? _undo : null,
                         onRestart: _restart,
                       ),
-                      PotScoreboard(
-                        score: game!.score,
-                        best: game!.highScore,
-                      ),
+                      PotScoreboard(score: game!.score, best: game!.highScore),
                       PotBoard(
                         tiles: game!.tiles,
                         lastMove: _lastMove,
