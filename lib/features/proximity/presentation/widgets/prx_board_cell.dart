@@ -2,14 +2,14 @@ import 'package:arcade/features/proximity/models/cell.dart';
 import 'package:arcade/shared/presentation/widgets/pixel_card.dart';
 import 'package:flutter/material.dart';
 
-class CellWidget extends StatelessWidget {
+class PrxBoardCell extends StatelessWidget {
   final Cell cell;
 
   final VoidCallback onTap;
   final VoidCallback onLongPress;
   final VoidCallback onSecondaryTap;
 
-  const CellWidget({
+  const PrxBoardCell({
     super.key,
     required this.cell,
     required this.onTap,
@@ -56,6 +56,9 @@ class CellWidget extends StatelessWidget {
         color: _numberColor(cell.adjacentMines),
         fontWeight: .bold,
       ),
+      textAlign: .center,
+      overflow: .ellipsis,
+      maxLines: 1,
     );
   }
 

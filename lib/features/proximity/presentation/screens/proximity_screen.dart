@@ -1,14 +1,19 @@
 import 'dart:async';
 
-import 'package:arcade/features/proximity/presentation/board.dart';
+import 'package:arcade/features/proximity/presentation/widgets/prx_actions.dart';
+import 'package:arcade/features/proximity/presentation/widgets/prx_board.dart';
 import 'package:arcade/features/proximity/game/game_storage.dart';
 import 'package:arcade/features/proximity/game/game_controller.dart';
 import 'package:arcade/features/proximity/models/difficulty.dart';
-import 'package:arcade/features/proximity/presentation/difficulty_dialog.dart';
+import 'package:arcade/features/proximity/presentation/dialogs/difficulty_dialog.dart';
+import 'package:arcade/features/proximity/presentation/widgets/prx_shortcuts.dart';
+import 'package:arcade/features/proximity/presentation/widgets/prx_timeboard.dart';
 import 'package:arcade/shared/presentation/dialogs/app_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_padding/smart_padding.dart';
 
 class ProximityScreen extends StatefulWidget {
   const ProximityScreen({super.key});
@@ -137,76 +142,88 @@ class _ProximityScreenState extends State<ProximityScreen> {
     setState(() {});
   }
 
+  KeyEventResult _handleKey(KeyEvent event) {
+    if (event is! KeyDownEvent) return .ignored;
+
+    if (HardwareKeyboard.instance.isControlPressed) return .ignored;
+    if (HardwareKeyboard.instance.isMetaPressed) return .ignored;
+
+    if (event.logicalKey == .keyD) {
+      _selectDifficulty();
+
+      return .handled;
+    }
+
+    if (event.logicalKey == .keyR) {
+      _restart();
+
+      return .handled;
+    }
+
+    return .ignored;
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    final localGame = game;
-
-    if (localGame == null) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => context.go('/'),
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (_, event) => _handleKey(event),
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () => context.go('/'),
+          ),
+          title: Text(
+            'Proximity',
+            style: textTheme.bodyLarge,
+            overflow: .ellipsis,
+            maxLines: 1,
+          ),
+          titleSpacing: 0.0,
         ),
-        title: Text('Proximity'),
-        actions: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 4.0,
+        body: SafeArea(
+          child: Center(
+            child: SmartPadding(
+              horizontal: 24.0,
+              bottom: 16.0,
+              child: Column(
+                mainAxisAlignment: .center,
+                spacing: 16.0,
                 children: [
-                  Icon(Icons.flag_rounded, size: 16, color: Color(0xFFF2D3F2)),
-                  Text(
-                    '${localGame.difficulty.mineCount - localGame.flagsUsed}',
-                  ),
+                  if (game == null) ...[
+                    CircularProgressIndicator(),
+                  ] else ...[
+                    PrxActions(
+                      flagsRemaining:
+                          game!.difficulty.mineCount - game!.flagsUsed,
+                      onChangeDifficulty: _selectDifficulty,
+                      onRestart: _restart,
+                    ),
+                    PrxTimeboard(
+                      gameStatus: _statusText(),
+                      difficulty: _difficultyLabel(game!.difficulty),
+                      elapsedTime: _formatDuration(game!.elapsed),
+                      bestTime: game!.bestTime == null
+                          ? '--:--'
+                          : _formatDuration(game!.bestTime!),
+                    ),
+                    Flexible(
+                      child: PrxBoard(
+                        board: game!.board,
+                        difficulty: game!.difficulty,
+                        onReveal: _reveal,
+                        onToggleFlag: _toggleFlag,
+                      ),
+                    ),
+                    PrxShortcuts(),
+                  ],
                 ],
               ),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
-            child: Center(child: Text(_formatDuration(localGame.elapsed))),
-          ),
-          IconButton(
-            onPressed: _selectDifficulty,
-            icon: Icon(Icons.tune_rounded, color: Color(0xFFF2D3F2)),
-            tooltip: 'Change difficulty',
-          ),
-          IconButton(
-            onPressed: _restart,
-            icon: Icon(Icons.refresh_rounded, color: Color(0xFFF2D3F2)),
-            tooltip: 'Restart',
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 16.0,
-          children: [
-            Text(_statusText(), style: textTheme.titleMedium),
-            Text(
-              _difficultyLabel(localGame.difficulty),
-              style: textTheme.bodySmall,
-            ),
-            Board(
-              board: localGame.board,
-              difficulty: localGame.difficulty,
-              onReveal: _reveal,
-              onToggleFlag: _toggleFlag,
-            ),
-            Text(
-              'Best: ${localGame.bestTime == null ? '--:--' : _formatDuration(localGame.bestTime!)}',
-              style: textTheme.bodyMedium,
-            ),
-          ],
         ),
       ),
     );

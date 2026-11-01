@@ -2,7 +2,7 @@ import 'package:arcade/app/screens/not_found_screen.dart';
 import 'package:arcade/app/screens/privacy_screen.dart';
 import 'package:arcade/features/powers_of_two/presentation/screens/powers_of_two_screen.dart';
 import 'package:arcade/features/arcade/presentation/arcade_screen.dart';
-import 'package:arcade/features/proximity/presentation/proximity_screen.dart';
+import 'package:arcade/features/proximity/presentation/screens/proximity_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
