@@ -11,7 +11,7 @@ class PotShortcuts extends StatelessWidget {
     final browser = ui_web.BrowserDetection.instance;
 
     return SizedBox(
-      width: 320.0,
+      width: 360.0,
       child: Wrap(
         alignment: .center,
         spacing: 32.0,

@@ -215,6 +215,7 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
             child: Center(
               child: SmartPadding(
                 horizontal: 24.0,
+                bottom: 16.0,
                 child: Column(
                   mainAxisAlignment: .center,
                   spacing: 16.0,
