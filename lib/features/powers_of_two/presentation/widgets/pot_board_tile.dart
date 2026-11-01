@@ -3,18 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:arcade/features/powers_of_two/models/tile.dart';
 import 'package:arcade/shared/presentation/widgets/pixel_card.dart';
 
-class BoardTile extends StatefulWidget {
+class PotBoardTile extends StatefulWidget {
   final Tile tile;
 
   final TileColorScheme colorScheme;
 
-  const BoardTile({super.key, required this.tile, required this.colorScheme});
+  const PotBoardTile({
+    super.key,
+    required this.tile,
+    required this.colorScheme,
+  });
 
   @override
-  State<BoardTile> createState() => _BoardTileState();
+  State<PotBoardTile> createState() => _PotBoardTileState();
 }
 
-class _BoardTileState extends State<BoardTile>
+class _PotBoardTileState extends State<PotBoardTile>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
@@ -43,7 +47,7 @@ class _BoardTileState extends State<BoardTile>
   }
 
   @override
-  void didUpdateWidget(covariant BoardTile oldWidget) {
+  void didUpdateWidget(covariant PotBoardTile oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.tile.value != _previousValue) {

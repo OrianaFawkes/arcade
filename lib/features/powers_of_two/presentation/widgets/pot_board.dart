@@ -1,5 +1,5 @@
 import 'package:arcade/features/powers_of_two/presentation/tile_color_scheme.dart';
-import 'package:arcade/features/powers_of_two/presentation/widgets/board_tile.dart';
+import 'package:arcade/features/powers_of_two/presentation/widgets/pot_board_tile.dart';
 import 'package:arcade/shared/presentation/widgets/pixel_button.dart';
 import 'package:flutter/material.dart';
 import 'package:arcade/features/powers_of_two/game/game_controller.dart';
@@ -8,7 +8,7 @@ import 'package:arcade/features/powers_of_two/models/tile.dart';
 import 'package:arcade/shared/presentation/widgets/pixel_card.dart';
 import 'package:smart_padding/smart_padding.dart';
 
-class Board extends StatefulWidget {
+class PotBoard extends StatefulWidget {
   final List<Tile> tiles;
 
   final MoveDirection? lastMove;
@@ -24,7 +24,7 @@ class Board extends StatefulWidget {
   final VoidCallback onRestart;
   final VoidCallback onContinue;
 
-  const Board({
+  const PotBoard({
     super.key,
     required this.tiles,
     this.lastMove,
@@ -38,10 +38,11 @@ class Board extends StatefulWidget {
   });
 
   @override
-  State<Board> createState() => _BoardState();
+  State<PotBoard> createState() => _PotBoardState();
 }
 
-class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
+class _PotBoardState extends State<PotBoard>
+    with SingleTickerProviderStateMixin {
   static double boardSize = 320;
   static double gap = 8;
 
@@ -62,7 +63,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
   }
 
   @override
-  void didUpdateWidget(covariant Board oldWidget) {
+  void didUpdateWidget(covariant PotBoard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.lastMove != null) _playJiggle(widget.lastMove!);
@@ -262,7 +263,7 @@ class _BoardState extends State<Board> with SingleTickerProviderStateMixin {
                       top: gap + tile.row * (cellSize + gap),
                       width: cellSize,
                       height: cellSize,
-                      child: BoardTile(
+                      child: PotBoardTile(
                         tile: tile,
                         colorScheme: widget.colorScheme,
                       ),

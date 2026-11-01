@@ -1,4 +1,4 @@
-import 'package:arcade/features/powers_of_two/presentation/widgets/board.dart';
+import 'package:arcade/features/powers_of_two/presentation/widgets/pot_board.dart';
 import 'package:arcade/features/powers_of_two/game/game_storage.dart';
 import 'package:arcade/features/powers_of_two/presentation/dialogs/settings_dialog.dart';
 import 'package:arcade/features/powers_of_two/presentation/tile_color_scheme.dart';
@@ -252,7 +252,7 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
                         best: game!.highScore,
                       ),
                     ),
-                    Board(
+                    PotBoard(
                       tiles: game!.tiles,
                       lastMove: _lastMove,
                       colorScheme: TileColorScheme.presets.firstWhere(
