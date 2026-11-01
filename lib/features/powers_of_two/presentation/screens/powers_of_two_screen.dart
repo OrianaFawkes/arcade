@@ -230,44 +230,41 @@ class _PowersOfTwoScreenState extends State<PowersOfTwoScreen> {
           ),
           body: SafeArea(
             child: Center(
-              child: Column(
-                mainAxisAlignment: .center,
-                spacing: 16.0,
-                children: [
-                  if (game == null) ...[
-                    CircularProgressIndicator(),
-                  ] else ...[
-                    SmartPadding(
-                      horizontal: 24.0,
-                      child: PotActions(
+              child: SmartPadding(
+                horizontal: 24.0,
+                child: Column(
+                  mainAxisAlignment: .center,
+                  spacing: 16.0,
+                  children: [
+                    if (game == null) ...[
+                      CircularProgressIndicator(),
+                    ] else ...[
+                      PotActions(
                         onShowSettings: _showSettings,
                         onUndo: game!.canUndo ? _undo : null,
                         onRestart: _restart,
                       ),
-                    ),
-                    SmartPadding(
-                      horizontal: 24.0,
-                      child: PotScoreboard(
+                      PotScoreboard(
                         score: game!.score,
                         best: game!.highScore,
                       ),
-                    ),
-                    PotBoard(
-                      tiles: game!.tiles,
-                      lastMove: _lastMove,
-                      colorScheme: TileColorScheme.presets.firstWhere(
-                        (e) => e.baseColor == game!.tileBaseColor,
+                      PotBoard(
+                        tiles: game!.tiles,
+                        lastMove: _lastMove,
+                        colorScheme: TileColorScheme.presets.firstWhere(
+                          (e) => e.baseColor == game!.tileBaseColor,
+                        ),
+                        showWinOverlay: _showWinOverlay,
+                        isGameOver: game!.isGameOver,
+                        hasBoardJiggle: game!.hasBoardJiggle,
+                        score: game!.score,
+                        onRestart: _restart,
+                        onContinue: _continueGame,
                       ),
-                      showWinOverlay: _showWinOverlay,
-                      isGameOver: game!.isGameOver,
-                      hasBoardJiggle: game!.hasBoardJiggle,
-                      score: game!.score,
-                      onRestart: _restart,
-                      onContinue: _continueGame,
-                    ),
-                    SmartPadding(horizontal: 24.0, child: PotShortcuts()),
+                      PotShortcuts(),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
